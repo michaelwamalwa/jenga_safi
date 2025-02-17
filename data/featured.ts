@@ -1,3 +1,4 @@
+{/*}
 const featuredData = [
     {
       title: "Building the Future: Modern Construction Methods",
@@ -42,3 +43,4 @@ const featuredData = [
   ];
   
   export default featuredData;
+  /*/}

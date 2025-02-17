@@ -21,7 +21,7 @@ export default function Home() {
         <div className="pb-8">
           <div>
             <LandingSection />
-            <FeaturedSection />
+           {/* <FeaturedSection />*/}
             <AboutSection />
             
             <ContactSection />
