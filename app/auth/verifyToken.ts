@@ -1,6 +1,6 @@
-'use server';
+"use server";
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 // Ensure environment variables are set
 if (!process.env.JWT_SECRET) {
@@ -15,8 +15,14 @@ export const POST = async (req: Request) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    return NextResponse.json({ message: 'Token is valid', email: decoded.email });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+
+    if (typeof decoded === "object" && "email" in decoded) {
+      return NextResponse.json({ message: 'Token is valid', email: decoded.email });
+    }
+
+    return NextResponse.json({ message: 'Token payload is invalid' }, { status: 400 });
+
   } catch (error) {
     return NextResponse.json({ message: 'Invalid or expired token' }, { status: 401 });
   }
