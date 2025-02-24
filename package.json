@@ -12,6 +12,7 @@
   "dependencies": {
     "@clerk/nextjs": "^6.10.4",
     "@emailjs/browser": "^4.4.1",
+    "@types/jsonwebtoken": "^9.0.9",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "clsx": "^2.1.1",
