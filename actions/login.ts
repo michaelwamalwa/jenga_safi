@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
 
     // Create JWT token with valid secret type
     const token = jwt.sign(tokenData, String(tokenSecret), {
-      expiresIn: process.env.TOKEN_EXPIRY || "1d",
+      expiresIn: "1d",
     });
 
     // Create a JSON response
