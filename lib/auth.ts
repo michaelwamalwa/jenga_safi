@@ -4,7 +4,17 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/app/models/user";
 import { connectDB } from "@/lib/db";
+import { DefaultSession } from "next-auth";
 
+declare module "next-auth" {
+  interface Session {
+    user: {
+      id: string;
+      name: string;
+      email: string;
+    } & DefaultSession["user"];
+  }
+}
 // Ensure environment variables are set
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in environment variables");
@@ -19,7 +29,12 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials.password) {
+          throw new Error("Email and password are required")
+        }
         await connectDB();
+
+    
 
         const user = await User.findOne({ email: credentials?.email }).select(
           "+password"
@@ -42,7 +57,6 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role,
         };
       },
     }),
@@ -56,7 +70,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-        token.role = user.role;
+       
       }
       return token;
     },
@@ -65,7 +79,7 @@ export const authOptions: NextAuthOptions = {
         id: token.id as string,
         name: token.name as string,
         email: token.email as string,
-        role: token.role as string,
+       
       };
       return session;
     },

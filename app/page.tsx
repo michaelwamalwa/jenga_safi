@@ -16,9 +16,9 @@ export default function Home() {
      
     <WaterWaveWrapper
       imageUrl=""
-      dropRadius="10"
-      pertubance="0.5"
-      resolution="1024"
+      dropRadius={10}
+      pertubance={0.5}
+      resolution={1024}
     >
       {() => (
         <div className="pb-8">

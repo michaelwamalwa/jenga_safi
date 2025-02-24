@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const { MONGODB_URI } = process.env;
 
@@ -16,10 +16,7 @@ export const connectDB = async (): Promise<void> => {
   }
 
   try {
-    const { connection } = await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    const { connection } = await mongoose.connect(MONGODB_URI);
 
     if (connection.readyState === 1) {
       isConnected = true;
