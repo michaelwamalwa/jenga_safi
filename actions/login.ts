@@ -39,7 +39,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure TOKEN_SECRET is set
-    if (!process.env.TOKEN_SECRET) {
+    const tokenSecret = process.env.TOKEN_SECRET;
+    if (!tokenSecret) {
       throw new Error("TOKEN_SECRET is missing in environment variables");
     }
 
@@ -51,8 +52,8 @@ export async function POST(request: NextRequest) {
       role: user.role,
     };
 
-    // Create JWT token
-    const token = jwt.sign(tokenData, process.env.TOKEN_SECRET as string, {
+    // Create JWT token with valid secret type
+    const token = jwt.sign(tokenData, String(tokenSecret), {
       expiresIn: process.env.TOKEN_EXPIRY || "1d",
     });
 
