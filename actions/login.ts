@@ -74,11 +74,16 @@ export async function POST(request: NextRequest) {
     );
 
     return response;
-  } catch (error) {
-    console.error("Login error:", error.message);
+  }  catch (error) {
+    if (error instanceof Error) {
+      console.error("Login error:", error.message);
+    } else {
+      console.error("Login error:", error);
+    }
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }
+  
 }
