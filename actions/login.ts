@@ -9,7 +9,8 @@ connectDB(); // Establish database connection
 export async function POST(request: NextRequest) {
   try {
     const reqBody = await request.json();
-    const { email, password } = reqBody;
+    const email = reqBody.email?.trim();
+    const password = reqBody.password?.trim();
 
     // Validate request body
     if (!email || !password) {
@@ -37,6 +38,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Ensure TOKEN_SECRET is set
+    if (!process.env.TOKEN_SECRET) {
+      throw new Error("TOKEN_SECRET is missing in environment variables");
+    }
+
     // Create token data
     const tokenData = {
       id: user._id,
@@ -45,35 +51,26 @@ export async function POST(request: NextRequest) {
       role: user.role,
     };
 
-    // Ensure TOKEN_SECRET is set
-    if (!process.env.TOKEN_SECRET) {
-      throw new Error("TOKEN_SECRET is not defined in environment variables");
-    }
+    // Create JWT token
+    const token = jwt.sign(tokenData, process.env.TOKEN_SECRET as string, {
+      expiresIn: process.env.TOKEN_EXPIRY || "1d",
+    });
 
-    // Create a token with expiration
-    const token = await jwt.sign(
-      tokenData,
-      process.env.TOKEN_SECRET,
-      { expiresIn: process.env.TOKEN_EXPIRY || "1d" }
-    );
-
-    // Create a JSON response indicating successful login
+    // Create a JSON response
     const response = NextResponse.json({
       message: "Login successful",
       success: true,
     });
 
-    // Set the token as an HTTP-only cookie
-    response.cookies.set("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 86400, // 1 day in seconds
-    });
+    // Manually set cookies in headers (Next.js 13+)
+    response.headers.set(
+      "Set-Cookie",
+      `token=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=86400; Path=/`
+    );
 
     return response;
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error:", error.message);
     return NextResponse.json(
       { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
