@@ -3,6 +3,11 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import FeaturedCard from "../cards/featured/featured-card";
 
+interface FeaturedItem {
+  title: string;
+  tag: string;
+  video: string;
+}
 export default function ExpendableFeatured() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   console.log("The hovered card is: ",hoveredIndex);
@@ -15,7 +20,7 @@ export default function ExpendableFeatured() {
 
   return (
     <div className="w-full grid lg:flex lg:justify-between lg:gap-x-4">
-      {featuredData.slice(1).map((featured, i) => (
+      {featuredData.slice(1).map((featured: FeaturedItem, i: number) => (
         <div
           key={i}
           className={cn(

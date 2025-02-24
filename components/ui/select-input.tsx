@@ -1,5 +1,4 @@
 import { FC } from "react";
-import { text } from "stream/consumers";
 
 interface SelectInputProps {
   type: "checkbox" | "radio";

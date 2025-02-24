@@ -6,7 +6,6 @@ import Card from "@/components/ui/card";
 import { FcPhone } from "react-icons/fc";
 import { AiTwotoneTool } from "react-icons/ai";
 import Input from "@/components/ui/input";
-import TextArea from "@/components/ui/text-area";
 import Button from "@/components/ui/button";
 export default function ContactSection() {
   const [services, setServices] = useState<string[]>([]);

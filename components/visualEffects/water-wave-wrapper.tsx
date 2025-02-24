@@ -4,9 +4,9 @@ import WaterWave from "react-water-wave";
 
 interface WaterWaveWrapperProps {
   imageUrl: string;
-  dropRadius: string;
-  pertubance: string;
-  resolution: string;
+  dropRadius: number;
+  pertubance: number;
+  resolution: number;
   children: () => ReactNode;
 }
 
@@ -22,7 +22,7 @@ const WaterWaveWrapper: FC<WaterWaveWrapperProps> = ({
   dropRadius={dropRadius}
   pertubance={pertubance}
   resolution={resolution}
-  >{children}</WaterWave>;
+  >{children()}</WaterWave>;
 };
 
 export default WaterWaveWrapper;

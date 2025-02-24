@@ -12,7 +12,6 @@ export const Cursor: FC<CursorProps> = ({color}) => {
       innerScale={1}
       outerScale={2}
       outerAlpha={0}
-      hasBlendMode={true}
       innerStyle={{
         backgroundColor: color, //color changes when different users
       }}

@@ -6,7 +6,7 @@ export default function SvgCurve() {
   const [containerWidth, setContainerWidth] = useState(0);
 
   let progress = 0;
-  let reqId: number | null = null;
+  let reqId: number = 0;
   let x = 0.5;
   let time = Math.PI / 2;
 
@@ -28,7 +28,7 @@ export default function SvgCurve() {
   }, []);
 
   const animateIn = () => {
-    if (reqId !== null) {
+    if (reqId) {
       cancelAnimationFrame(reqId);
       time = Math.PI / 2;
     }
