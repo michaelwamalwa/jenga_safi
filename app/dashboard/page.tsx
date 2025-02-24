@@ -11,15 +11,13 @@ export default function Home() {
   const router = useRouter();
 
   //Check user role
-  const userRole = session?.user?.role;
+  const userRole = "user";
 
   useEffect(() => {
-    if (status === "unaunthenticated") {
+    if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
-      if (userRole === "admin") {
-        setActiveTab("admin-dashboard");
-      } else {
+      {
         setActiveTab("dashboard");
       }
     }
@@ -78,49 +76,7 @@ export default function Home() {
         </div>
         <nav className="flex-grow px-4 py-6 space-y-4">
           {/*Conditional rendering based on user role */}
-          {userRole === "admin" ? (
-            <>
-              {/*Admin options */}
-              <button
-                onClick={() => handleTabChange("manage-users")}
-                className="flex items-center gap-3 p-2 rounded hover:bg-gray-700"
-              >
-                <span className="text-xl">👥</span>
-                <span>Manage Users</span>
-              </button>
-              <button
-                onClick={() => handleTabChange("admin-dashboard")}
-                className="flex items-center gap-3 p-2 rounded hover:bg-gray-700"
-              >
-                <span className="text-xl">📊</span>
-                <span>Admin Dashboard</span>
-              </button>
-            </>
-          ) : (
-            <>
-              <button
-                onClick={() => handleTabChange("tasks")}
-                className="flex items-center gap-3 p-2 rounded hover:bg-gray-700"
-              >
-                <span className="text-xl">🗒️</span>
-                <span>Tasks</span>
-              </button>
-              <button
-                onClick={() => handleTabChange("projects")}
-                className="flex items-center gap-3 p-2 rounded hover:bg-gray-700"
-              >
-                <span className="text-xl">📂</span>
-                <span>Projects</span>
-              </button>
-              <button
-                onClick={() => handleTabChange("notifications")}
-                className="flex items-center gap-3 p-2 rounded hover:bg-gray-700"
-              >
-                <span className="text-xl">🔔</span>
-                <span>Notifications</span>
-              </button>
-            </>
-          )}
+      
         </nav>
       </aside>
       {/*Main Content */}
