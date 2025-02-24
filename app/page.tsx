@@ -1,11 +1,14 @@
 
 "use client";
-
- import WaterWaveWrapper from "@/components/visualEffects/water-wave-wrapper";
 import AboutSection from "@/sections/about";
-import FeaturedSection from "@/sections/featured";
 import LandingSection from "@/sections/landing";
 import ContactSection from "@/sections/contact";
+import dynamic from "next/dynamic";
+
+const WaterWaveWrapper = dynamic (
+  () => import("@/components/visualEffects/water-wave-wrapper"),
+  { ssr: false}
+);
 
 export default function Home() {
 
@@ -21,7 +24,7 @@ export default function Home() {
         <div className="pb-8">
           <div>
             <LandingSection />
-           {/* <FeaturedSection />*/}
+   
             <AboutSection />
             
             <ContactSection />

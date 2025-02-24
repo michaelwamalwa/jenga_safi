@@ -1,5 +1,5 @@
 // pages/api/login.ts
-import connectDB from '../../lib/db';
+import { connectDB } from '../../lib/db';
 import User from '../../app/models/user';
 import { NextApiRequest, NextApiResponse } from 'next';
 
