@@ -39,8 +39,7 @@ const userSchema = new mongoose.Schema({
   verifyTokenExpiry: Date,
 });
 
-// Add indexes
-userSchema.index({ email: 1 });
+
 
 const User = mongoose.models.users || mongoose.model("users", userSchema);
 
