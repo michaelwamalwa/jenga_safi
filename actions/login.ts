@@ -1,9 +1,11 @@
 import { connectDB } from "@/lib/db";
+import dotenv from "dotenv";
 import User from "@/app/models/user";
 import { NextRequest, NextResponse } from "next/server";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+dotenv.config();//Load environment variables
 connectDB(); // Establish database connection
 
 export async function POST(request: NextRequest) {
@@ -39,11 +41,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure TOKEN_SECRET is set
-    const tokenSecret = process.env.TOKEN_SECRET;
+    const tokenSecret = process.env.JWT_SECRET;
     if (!tokenSecret) {
+     
       throw new Error("TOKEN_SECRET is missing in environment variables");
     }
 
+    console.log("JWT_SECRET: " + tokenSecret); //Debugging
     // Create token data
     const tokenData = {
       id: user._id,
@@ -53,9 +57,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Create JWT token with valid secret type
-    const token = jwt.sign(
-      tokenData, 
-      process.env.TOKEN_SECRET as string, {
+    const token = jwt.sign(tokenData, String(tokenSecret), {
       expiresIn: process.env.TOKEN_EXPIRY || "1d",
     });
 
