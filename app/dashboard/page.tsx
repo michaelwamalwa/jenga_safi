@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import axios from "axios";
-
 export default function Home() {
   const { status, data: session } = useSession();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -25,7 +23,7 @@ export default function Home() {
         setActiveTab("dashboard");
       }
     }
-  }, [status, router]);
+  }, [status, router, userRole]);
 
 
   const showSession = () => {

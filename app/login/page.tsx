@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -84,12 +84,11 @@ export default function LoginSection() {
           </button>
         </form>
 
-        <p className="mt-6 text-sm text-center text-gray-600">
-          Don't have an account?{" "}
+       
           <Link href="/signup" className="text-indigo-600 font-medium hover:underline">
             Sign up
           </Link>
-        </p>
+      
       </Card>
     </div>
   );
