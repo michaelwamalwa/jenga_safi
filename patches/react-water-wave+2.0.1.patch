@@ -1,0 +1,98 @@
+diff --git a/node_modules/react-water-wave/lib/index.js b/node_modules/react-water-wave/lib/index.js
+index d9e7f43..eaafd42 100644
+--- a/node_modules/react-water-wave/lib/index.js
++++ b/node_modules/react-water-wave/lib/index.js
+@@ -27,6 +27,7 @@ var jsx_runtime_1 = require("react/jsx-runtime");
+ var react_1 = require("react");
+ var $ = require("jquery");
+ require("jquery.ripples");
++
+ var useRipples = function (_a) {
+     var imageUrl = _a.imageUrl, dropRadius = _a.dropRadius, perturbance = _a.perturbance, resolution = _a.resolution, interactive = _a.interactive, crossOrigin = _a.crossOrigin, rippleRef = _a.rippleRef;
+     var target = (0, react_1.useRef)({
+@@ -37,6 +38,7 @@ var useRipples = function (_a) {
+             }
+         },
+     });
++
+     (0, react_1.useEffect)(function () {
+         target.current = $(rippleRef.current);
+         target.current.ripples({
+@@ -59,6 +61,7 @@ var useRipples = function (_a) {
+         resolution,
+         rippleRef,
+     ]);
++
+     var destroy = function () {
+         target.current.ripples('destroy');
+     };
+@@ -85,6 +88,7 @@ var useRipples = function (_a) {
+     var updateSize = function () {
+         target.current.ripples('updateSize');
+     };
++
+     return {
+         destroy: destroy,
+         pause: pause,
+@@ -96,10 +100,21 @@ var useRipples = function (_a) {
+         updateSize: updateSize,
+     };
+ };
++
+ exports.useRipples = useRipples;
++
+ function WaterEffect(_a) {
+-    var _b = _a.imageUrl, imageUrl = _b === void 0 ? '' : _b, _c = _a.dropRadius, dropRadius = _c === void 0 ? 20 : _c, _d = _a.perturbance, perturbance = _d === void 0 ? 0.03 : _d, _e = _a.resolution, resolution = _e === void 0 ? 256 : _e, _f = _a.interactive, interactive = _f === void 0 ? true : _f, _g = _a.crossOrigin, crossOrigin = _g === void 0 ? '' : _g, children = _a.children, otherProps = __rest(_a, ["imageUrl", "dropRadius", "perturbance", "resolution", "interactive", "crossOrigin", "children"]);
++    var _b = _a.imageUrl, imageUrl = _b === void 0 ? '' : _b, 
++        _c = _a.dropRadius, dropRadius = _c === void 0 ? 20 : _c, 
++        _d = _a.perturbance, perturbance = _d === void 0 ? 0.03 : _d, 
++        _e = _a.resolution, resolution = _e === void 0 ? 256 : _e, 
++        _f = _a.interactive, interactive = _f === void 0 ? true : _f, 
++        _g = _a.crossOrigin, crossOrigin = _g === void 0 ? '' : _g, 
++        children = _a.children, 
++        otherProps = __rest(_a, ["imageUrl", "dropRadius", "perturbance", "resolution", "interactive", "crossOrigin", "children"]);
++
+     var rippleRef = (0, react_1.useRef)(null);
++
+     var _h = (0, exports.useRipples)({
+         imageUrl: imageUrl,
+         dropRadius: dropRadius,
+@@ -108,16 +123,27 @@ function WaterEffect(_a) {
+         interactive: interactive,
+         crossOrigin: crossOrigin,
+         rippleRef: rippleRef,
+-    }), destroy = _h.destroy, pause = _h.pause, play = _h.play, hide = _h.hide, show = _h.show, drop = _h.drop, set = _h.set, updateSize = _h.updateSize;
+-    return ((0, jsx_runtime_1.jsx)("div", __assign({ ref: rippleRef }, otherProps, { children: children({
+-            destroy: destroy,
+-            pause: pause,
+-            play: play,
+-            hide: hide,
+-            show: show,
+-            drop: drop,
+-            set: set,
+-            updateSize: updateSize,
+-        }) })));
++    }), 
++    destroy = _h.destroy, 
++    pause = _h.pause, 
++    play = _h.play, 
++    hide = _h.hide, 
++    show = _h.show, 
++    drop = _h.drop, 
++    set = _h.set, 
++    updateSize = _h.updateSize;
++
++    // Debugging logs
++    console.log("Value of children:", children);
++    console.log("Type of children:", typeof children);
++
++    return (
++        (0, jsx_runtime_1.jsx)("div", __assign({ ref: rippleRef }, otherProps, { 
++            children: typeof children === "function" 
++                ? children({ destroy, pause, play, hide, show, drop, set, updateSize }) 
++                : children // If it's not a function, just render it as is
++        }))
++    );
+ }
++
+ exports.default = WaterEffect;

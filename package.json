@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "type": "module",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.10.4",
@@ -29,6 +30,8 @@
     "next-auth": "^4.24.11",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.9",
+    "patch-package": "^8.0.0",
+    "postinstall-postinstall": "^2.1.0",
     "reac": "^0.0.0",
     "react": "^19.0.0",
     "react-animated-cursor": "^2.11.2",
