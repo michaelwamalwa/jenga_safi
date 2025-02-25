@@ -15,7 +15,7 @@ const MagneticWrapper: FC<MagneticWrapperProps> = ({ className, children }) => {
 
   // Handle Mouse Move (For Desktops)
   const handleMouse = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    if (isTouch) return; // Ignore mouse events if touch detected
+    if (isTouch) return; // Ignore mouse events if touch is detected
 
     const { clientX, clientY } = e;
     const boundingRect = ref.current?.getBoundingClientRect();
@@ -33,21 +33,28 @@ const MagneticWrapper: FC<MagneticWrapperProps> = ({ className, children }) => {
   };
 
   // Handle Touch Start (For Mobile)
-  const handleTouchStart = () => {
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     setIsTouch(true); // Detect touch to disable mouse move effect
+  };
+
+  // Handle Click (To Ensure Taps Work)
+  const handleClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    e.stopPropagation(); // Prevent weird bubbling issues
+    console.log("✅ Click registered!");
   };
 
   const { x, y } = position;
 
   return (
     <motion.div
-      className={cn("relative", className)}
+      className={cn("relative touch-manipulation", className)}
       ref={ref}
       animate={!isTouch ? { x, y } : { x: 0, y: 0 }} // Disable movement on touch
       transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
       onMouseMove={handleMouse}
       onMouseLeave={reset}
       onTouchStart={handleTouchStart} // Detect touch
+      onClick={handleClick} // Ensure tap-to-click works
     >
       {children}
     </motion.div>
