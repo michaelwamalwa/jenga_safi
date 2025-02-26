@@ -47,17 +47,19 @@ const MagneticWrapper: FC<MagneticWrapperProps> = ({ className, children }) => {
 
   return (
     <motion.div
-      className={cn("relative touch-manipulation", className)}
-      ref={ref}
-      animate={!isTouch ? { x, y } : { x: 0, y: 0 }} // Disable movement on touch
-      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
-      onMouseMove={handleMouse}
-      onMouseLeave={reset}
-      onTouchStart={handleTouchStart} // Detect touch
-      onClick={handleClick} // Ensure tap-to-click works
-    >
-      {children}
-    </motion.div>
+    className={cn("relative touch-manipulation pointer-events-auto", className)}
+    ref={ref}
+    animate={!isTouch ? { x, y } : { x: 0, y: 0 }} // Disable movement on touch
+    transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+    onMouseMove={handleMouse}
+    onMouseLeave={reset}
+    onTouchStart={handleTouchStart} // Detect touch
+    onClick={handleClick} // Ensure tap-to-click works
+    style={{ touchAction: "manipulation" }} // Ensures proper touch handling
+  >
+    {children}
+  </motion.div>
+  
   );
 };
 

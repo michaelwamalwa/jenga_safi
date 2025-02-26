@@ -36,7 +36,7 @@ export default function Home() {
             {() => <AboutSection />}
           </WaterWaveWrapper>
         ) : (
-          <AboutSection /> // Normal render if the effect isn't supported
+          <AboutSection /> 
         )}
 
         <ContactSection />
