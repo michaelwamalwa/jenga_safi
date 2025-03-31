@@ -7,14 +7,18 @@ import { connectDB } from "@/lib/db";
 import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
+  interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: "admin" | "user"; // Ensure role is available
+  }
+
   interface Session {
-    user: {
-      id: string;
-      name: string;
-      email: string;
-    } & DefaultSession["user"];
+    user: User;
   }
 }
+
 // Ensure environment variables are set
 if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET is not defined in environment variables");
@@ -30,14 +34,12 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials.password) {
-          throw new Error("Email and password are required")
+          throw new Error("Email and password are required");
         }
         await connectDB();
 
-    
-
-        const user = await User.findOne({ email: credentials?.email }).select(
-          "+password"
+        const user = await User.findOne({ email: credentials.email }).select(
+          "+password role" // Ensure role is fetched
         );
 
         if (!user) {
@@ -57,6 +59,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
+          role: user.role, // Ensure role is returned
         };
       },
     }),
@@ -70,7 +73,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-       
+        token.role = user.role; // Attach role to token
       }
       return token;
     },
@@ -79,7 +82,7 @@ export const authOptions: NextAuthOptions = {
         id: token.id as string,
         name: token.name as string,
         email: token.email as string,
-       
+        role: token.role as "admin" | "user", // Ensure role is available in session
       };
       return session;
     },

@@ -1,15 +1,15 @@
 import { cn } from "@/lib/utils";
 import Link from "@/node_modules/next/link";
-import { FC, ReactNode } from "react";
+import { FC, ReactNode,ButtonHTMLAttributes } from "react";
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   link?: string;
   isIcon?: boolean;
   className?: string;
 }
 
-const Button: FC<ButtonProps> = ({ children, className, isIcon, link }) => {
+const Button: FC<ButtonProps> = ({ children, className, isIcon, link, ...props }) => {
   return (
     <>
       {link ? (
@@ -20,9 +20,12 @@ const Button: FC<ButtonProps> = ({ children, className, isIcon, link }) => {
         </Link>
       ) : (
         <div>
+          <button {...props} className="w-auto h-full">
           <ButtonBody className={className} isIcon={isIcon}>
             {children}
           </ButtonBody>
+          </button>
+         
         </div>
       )}
     </>
