@@ -5,20 +5,19 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function Home() {
-  const { status, data: session } = useSession(); // ✅ Only call useSession() here
+  const { status, data: session } = useSession();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const userRole = session?.user?.role || "user"; // Default to "user"
-
   useEffect(() => {
+    console.log("Session Data:", session); // Debugging
     if (status === "unauthenticated") {
       router.push("/login");
     } else if (status === "authenticated") {
       setActiveTab("dashboard");
     }
-  }, [status, router]);
+  }, [status, router, session]);
 
   const handleLogout = () => {
     if (window.confirm("Are you sure you want to log out?")) {
@@ -43,28 +42,24 @@ export default function Home() {
             Dashboard
           </button>
 
-          {/* Admin-Only Tabs */}
-          {userRole === "admin" && (
-            <>
-              <button
-                className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
-                  activeTab === "manage-users" ? "bg-gray-700" : ""
-                }`}
-                onClick={() => setActiveTab("manage-users")}
-              >
-                Manage Users
-              </button>
+          {/* Removed Role-Based Checks */}
+          <button
+            className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
+              activeTab === "manage-users" ? "bg-gray-700" : ""
+            }`}
+            onClick={() => setActiveTab("manage-users")}
+          >
+            Manage Users
+          </button>
 
-              <button
-                className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
-                  activeTab === "admin-dashboard" ? "bg-gray-700" : ""
-                }`}
-                onClick={() => setActiveTab("admin-dashboard")}
-              >
-                Admin Dashboard
-              </button>
-            </>
-          )}
+          <button
+            className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
+              activeTab === "admin-dashboard" ? "bg-gray-700" : ""
+            }`}
+            onClick={() => setActiveTab("admin-dashboard")}
+          >
+            Admin Dashboard
+          </button>
         </nav>
       </aside>
 
@@ -113,7 +108,7 @@ export default function Home() {
             </div>
           )}
 
-          {activeTab === "manage-users" && userRole === "admin" && (
+          {activeTab === "manage-users" && (
             <div>
               <h2 className="text-xl font-bold">Manage Users</h2>
               <ul className="list-disc pl-5 space-y-2">
@@ -124,7 +119,7 @@ export default function Home() {
             </div>
           )}
 
-          {activeTab === "admin-dashboard" && userRole === "admin" && (
+          {activeTab === "admin-dashboard" && (
             <div>
               <h2 className="text-xl font-bold">Admin Dashboard</h2>
               <p className="mt-2">System Logs</p>
