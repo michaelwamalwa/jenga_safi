@@ -11,7 +11,6 @@ declare module "next-auth" {
     id: string;
     name: string;
     email: string;
-    role: "admin" | "user"; // Ensure role is available
   }
 
   interface Session {
@@ -39,7 +38,7 @@ export const authOptions: NextAuthOptions = {
         await connectDB();
 
         const user = await User.findOne({ email: credentials.email }).select(
-          "+password role" // Ensure role is fetched
+          "+password " // Ensure role is fetched
         );
 
         if (!user) {
@@ -59,7 +58,6 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
-          role: user.role, // Ensure role is returned
         };
       },
     }),
@@ -73,7 +71,6 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
-        token.role = user.role; // Attach role to token
       }
       return token;
     },
@@ -81,8 +78,8 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         id: token.id as string,
         name: token.name as string,
-        email: token.email as string,
-        role: token.role as "admin" | "user", // Ensure role is available in session
+        email: token.email as string
+        
       };
       return session;
     },
