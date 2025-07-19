@@ -11,9 +11,10 @@ import { IContractor } from '@/app/models/contractor';
 interface ContractorListClientProps {
   contractors: IContractor[];
 }
+type StatusFilter = 'all' | 'active' | 'on-hold' | 'archived';
 
 const ContractorListClient: React.FC<ContractorListClientProps> = ({ contractors }) => {
-  const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'on-hold' | 'archived'>('all');
+  const [activeFilter, setActiveFilter] = useState<StatusFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortField, setSortField] = useState<'name' | 'rating' | 'sustainabilityScore' | 'projectsCompleted'>('name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -82,28 +83,29 @@ const ContractorListClient: React.FC<ContractorListClientProps> = ({ contractors
     }
   };
 
+
   return (
     <div className="container mx-auto px-4 py-6">
       {/* Top Filters */}
       <div className="flex flex-wrap justify-between mb-6 gap-4">
-        <div className="flex gap-2">
-          {['all', 'active', 'on-hold', 'archived'].map((status) => (
-            <button
-              key={status}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
-                activeFilter === status
-                  ? 'bg-green-100 text-green-700 border border-green-300'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-              onClick={() => setActiveFilter(status as any)}
-            >
-              {status === 'active' && <CheckCircle className="mr-1" size={16} />}
-              {status === 'on-hold' && <Pause className="mr-1" size={16} />}
-              {status === 'archived' && <AlertTriangle className="mr-1" size={16} />}
-              <span className="capitalize">{status.replace('-', ' ')}</span>
-            </button>
-          ))}
-        </div>
+      <div className="flex gap-2">
+    {['all', 'active', 'on-hold', 'archived'].map((status) => (
+      <button
+        key={status}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center ${
+          activeFilter === status
+            ? 'bg-green-100 text-green-700 border border-green-300'
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        }`}
+        onClick={() => setActiveFilter(status as StatusFilter)}
+      >
+        {status === 'active' && <CheckCircle className="mr-1" size={16} />}
+        {status === 'on-hold' && <Pause className="mr-1" size={16} />}
+        {status === 'archived' && <AlertTriangle className="mr-1" size={16} />}
+        <span className="capitalize">{status.replace('-', ' ')}</span>
+      </button>
+    ))}
+  </div>
 
         <div className="relative">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">

@@ -10,8 +10,12 @@ export default function ActivityLogPage() {
         Admins can view task completions, user changes, and more.
       </p>
       <ul className="space-y-2">
-        <li className="bg-gray-100 p-3 rounded">User JohnDoe completed "Recycle Plastic" on June 21</li>
-        <li className="bg-gray-100 p-3 rounded">Admin updated team permissions on June 19</li>
+        <li className="bg-gray-100 p-3 rounded">
+          User JohnDoe completed &quot;Recycle Plastic&quot; on June 21
+        </li>
+        <li className="bg-gray-100 p-3 rounded">
+          Admin updated team permissions on June 19
+        </li>
         {/* Add real logs from the database later */}
       </ul>
     </div>
