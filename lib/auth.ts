@@ -11,6 +11,7 @@ declare module "next-auth" {
     id: string;
     name: string;
     email: string;
+    role: string;
   }
 
   interface Session {
@@ -58,6 +59,7 @@ export const authOptions: NextAuthOptions = {
           id: user._id.toString(),
           name: user.name,
           email: user.email,
+          role: user.role
         };
       },
     }),
@@ -78,8 +80,8 @@ export const authOptions: NextAuthOptions = {
       session.user = {
         id: token.id as string,
         name: token.name as string,
-        email: token.email as string
-        
+        email: token.email as string,
+        role: token.role as string
       };
       return session;
     },

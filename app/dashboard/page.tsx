@@ -1,142 +1,108 @@
 "use client";
-import { signOut, useSession } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import FloatingLeaves from "./components/floating";
+import EcoStats from "./components/ecostats";
 
-export default function Home() {
-  const { status, data: session } = useSession();
-  const [activeTab, setActiveTab] = useState("dashboard");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+export default function DashboardPage() {
+  const [ecoPoints, setEcoPoints] = useState(1240);
+  const [carbonSaved, setCarbonSaved] = useState(42.5);
+  const [waterSaved, setWaterSaved] = useState(1240);
 
-  useEffect(() => {
-    console.log("Session Data:", session); // Debugging
-    if (status === "unauthenticated") {
-      router.push("/login");
-    } else if (status === "authenticated") {
-      setActiveTab("dashboard");
-    }
-  }, [status, router, session]);
+  const handleTaskComplete = () => {
+    // Animate eco points increase
+    setEcoPoints((prev) => {
+      const newPoints = prev + 50;
+      animateValue(prev, newPoints, setEcoPoints);
+      return newPoints;
+    });
 
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
-      signOut({ redirect: false }).then(() => router.push("/login"));
-    }
+    // Animate carbon saved
+    setCarbonSaved((prev) => {
+      const newCarbon = prev + 1.2;
+      animateValue(prev, newCarbon, setCarbonSaved, 1);
+      return newCarbon;
+    });
+  };
+
+  const animateValue = (
+    start: number,
+    end: number,
+    setter: (value: number) => void,
+    decimals: number = 0
+  ) => {
+    const duration = 1500;
+    const startTime = performance.now();
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const value = parseFloat(
+        (start + (end - start) * progress).toFixed(decimals)
+      );
+
+      setter(value);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white flex flex-col">
-        <div className="px-6 py-4 border-b border-gray-700">
-          <h2 className="text-2xl font-semibold">Nexora</h2>
-        </div>
-        <nav className="flex-grow px-4 py-6 space-y-4">
-          <button 
-            className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
-              activeTab === "dashboard" ? "bg-gray-700" : ""
-            }`}
-            onClick={() => setActiveTab("dashboard")}
-          >
-            Dashboard
-          </button>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-cyan-50 relative">
+      <FloatingLeaves />
 
-          {/* Removed Role-Based Checks */}
-          <button
-            className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
-              activeTab === "manage-users" ? "bg-gray-700" : ""
-            }`}
-            onClick={() => setActiveTab("manage-users")}
-          >
-            Manage Users
-          </button>
+      <div className="container mx-auto px-4 py-8">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h1 className="text-3xl font-bold text-emerald-800 flex items-center gap-3">
+            <span className="bg-green-100 p-3 rounded-xl">🌱</span>
+            <div>
+              Nexora Dashboard
+              <p className="text-lg font-normal text-emerald-600">
+                Eco-friendly task management
+              </p>
+            </div>
+          </h1>
+        </motion.div>
 
-          <button
-            className={`block w-full text-left py-2 px-4 rounded transition-all duration-300 ease-in-out hover:bg-gray-600 ${
-              activeTab === "admin-dashboard" ? "bg-gray-700" : ""
-            }`}
-            onClick={() => setActiveTab("admin-dashboard")}
-          >
-            Admin Dashboard
-          </button>
-        </nav>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-4 border-b pb-4">
-          <span className="text-lg font-semibold">Nexora</span>
-          <div className="flex flex-col items-center">
-            {status === "authenticated" ? (
-              <>
-                <p className="mb-2">Welcome, {session?.user?.name || "User"}!</p>
-                <button
-                  className="border border-black rounded px-4 py-2 transition-all duration-300 ease-in-out hover:bg-black hover:text-white"
-                  onClick={handleLogout}
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <Link 
-                href="/login" 
-                className="border border-black rounded px-4 py-2 transition-all duration-300 ease-in-out hover:bg-black hover:text-white"
-              >
-                Sign In
-              </Link>
-            )}
+        <EcoStats
+          ecoPoints={ecoPoints}
+          carbonSaved={carbonSaved}
+          waterSaved={waterSaved}
+        />
+        <motion.div
+          className="mt-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white"
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-2xl font-bold mb-4">
+              Join the Sustainability Movement
+            </h2>
+            <p className="mb-6 text-green-100">
+              Every task you complete contributes to our collective
+              environmental impact. Together we've saved {carbonSaved}kg of CO2
+              and {waterSaved}L of water this month!
+            </p>
+            <motion.button
+              className="bg-white text-emerald-700 font-bold px-6 py-3 rounded-full hover:bg-green-50 transition-colors"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Share Your Impact
+            </motion.button>
           </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className={`transition-transform duration-300 ease-in-out ${loading ? "transform translate-x-8 opacity-0" : ""}`}>
-          {activeTab === "dashboard" && (
-            <div>
-              <h2 className="text-xl font-bold">User Dashboard</h2>
-              <p className="mt-2">Recent Tasks</p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li className="hover:underline cursor-pointer">Task 1 - In Progress</li>
-                <li className="hover:underline cursor-pointer">Task 2 - Completed</li>
-                <li className="hover:underline cursor-pointer">Task 3 - Pending</li>
-              </ul>
-              <p className="mt-4">Notifications</p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li className="hover:underline cursor-pointer">Meeting at 3 PM</li>
-                <li className="hover:underline cursor-pointer">Project deadline extended</li>
-              </ul>
-            </div>
-          )}
-
-          {activeTab === "manage-users" && (
-            <div>
-              <h2 className="text-xl font-bold">Manage Users</h2>
-              <ul className="list-disc pl-5 space-y-2">
-                <li className="hover:underline cursor-pointer">User 1 - Admin</li>
-                <li className="hover:underline cursor-pointer">User 2 - Editor</li>
-                <li className="hover:underline cursor-pointer">User 3 - Viewer</li>
-              </ul>
-            </div>
-          )}
-
-          {activeTab === "admin-dashboard" && (
-            <div>
-              <h2 className="text-xl font-bold">Admin Dashboard</h2>
-              <p className="mt-2">System Logs</p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li className="hover:underline cursor-pointer">Admin logged in</li>
-                <li className="hover:underline cursor-pointer">User updated profile</li>
-                <li className="hover:underline cursor-pointer">New project created</li>
-              </ul>
-              <p className="mt-4">Analytics</p>
-              <ul className="list-disc pl-5 space-y-2">
-                <li className="hover:underline cursor-pointer">Active Users: 45</li>
-                <li className="hover:underline cursor-pointer">Projects Completed: 12</li>
-              </ul>
-            </div>
-          )}
-        </div>
-      </main>
+        </motion.div>
+      </div>
     </div>
   );
 }

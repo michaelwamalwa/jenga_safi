@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Provider } from "./provider";
+import  Providers  from "./providers";
 import { cn } from "@/lib/utils";
 import { Bricolage_Grotesque, Oswald } from "next/font/google";
 import localFont from "next/font/local";
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <Provider>
+      <Providers>
       <body
         className={cn(
           MainFont.className,
@@ -41,7 +41,7 @@ export default function RootLayout({
         <Cursor color="#fff" />
         {children}
       </body>
-      </Provider>
+      </Providers>
     </html>
   );
 }
