@@ -114,61 +114,57 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
-      {/* Header */}
-      <header className="space-y-2 text-center sm:text-left">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-emerald-700">
+    <div className="p-8 space-y-12 max-w-7xl mx-auto">
+      <header className="space-y-2">
+        <h1 className="text-4xl font-bold text-emerald-700">
           Sustainability Dashboard
         </h1>
-        <p className="text-gray-600 text-base sm:text-lg">
+        <p className="text-gray-600 text-lg">
           Welcome, {session?.user?.name || "Guest"}!
         </p>
       </header>
-  
-      {/* Loading */}
+
       {loadingProfile && (
         <div className="text-gray-500 text-center">Loading profile…</div>
       )}
-  
-      {/* Empty profile → Show modal */}
+
       {!loadingProfile && hasFetched && !clientData && (
         <ClientInfoModal onSave={handleProfileSave} />
       )}
-  
-      {/* Profile + Tabs */}
+
       {!loadingProfile && clientData && (
-        <div className="space-y-8">
+        <div className="space-y-10">
           {/* Profile Card */}
           <motion.div
-            className="bg-white rounded-2xl p-6 sm:p-8 shadow-md max-w-4xl mx-auto"
+            className="bg-white rounded-2xl p-8 shadow-md max-w-4xl mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-emerald-700 mb-4">
+            <h2 className="text-2xl font-bold text-emerald-700 mb-4">
               Welcome back, {clientData.name}! 🌱
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 text-gray-700 text-sm sm:text-base">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
               <p>
                 <strong>Email:</strong> {clientData.email}
               </p>
             </div>
-            <div className="mt-6 flex justify-center sm:justify-start">
+            <div className="mt-6 flex justify-start">
               <button
                 onClick={() => setShowProfileForm(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 sm:px-5 py-2 rounded-lg transition text-sm sm:text-base"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg transition"
               >
                 Edit Profile
               </button>
             </div>
           </motion.div>
-  
+
           {/* Tabs */}
-          <div className="border-b border-gray-200 flex overflow-x-auto">
+          <div className="border-b border-gray-200 flex space-x-4">
             {["overview", "projects", "eco-tasks"].map((tab) => (
               <button
                 key={tab}
-                className={`flex-shrink-0 px-4 py-2 text-sm sm:text-base font-medium transition ${
+                className={`px-4 py-2 font-medium transition ${
                   activeTab === tab
                     ? "text-emerald-600 border-b-2 border-emerald-600"
                     : "text-gray-500 hover:text-gray-700"
@@ -179,12 +175,12 @@ export default function DashboardPage() {
               </button>
             ))}
           </div>
-  
+
           {/* Tab Content */}
-          <div className="space-y-6 sm:space-y-8">
+          <div className="space-y-8">
             {activeTab === "overview" && (
-              <div className="flex flex-col space-y-6 lg:flex-row lg:space-x-8 lg:space-y-0">
-                <div className="flex-1 bg-white p-6 sm:p-8 rounded-2xl shadow-md">
+              <div className="flex flex-col lg:flex-row lg:space-x-8 gap-8">
+                <div className="flex-1 bg-white p-8 rounded-2xl shadow-md">
                   <CarbonVisualization
                     siteId="all"
                     carbonEmitted={clientData.carbonEmitted}
@@ -201,11 +197,11 @@ export default function DashboardPage() {
                 </div>
               </div>
             )}
-  
+
             {activeTab === "projects" && (
               <ProjectList projects={projects} onAddProject={addProject} />
             )}
-  
+
             {activeTab === "eco-tasks" && (
               <EcoTaskManager
                 tasks={ecoTasks}
@@ -217,8 +213,7 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-  
-      {/* Profile Form Modal */}
+
       {showProfileForm && (
         <ProfileForm
           initialData={clientData}
@@ -228,5 +223,4 @@ export default function DashboardPage() {
       )}
     </div>
   );
-  
 }
