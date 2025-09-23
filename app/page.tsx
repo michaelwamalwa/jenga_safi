@@ -13,26 +13,36 @@ const WaterWaveWrapper = dynamic(
   { ssr: false }
 );
 
+// Helper to check WebGL + extension support
+function supportsWaterEffect(): boolean {
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") as WebGLRenderingContext | null;
+    return (
+      !!gl &&
+      typeof gl.getExtension === "function" &&
+      !!gl.getExtension("OES_texture_float")
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function Home() {
   const [isWaterEffectSupported, setIsWaterEffectSupported] = useState(false);
 
   useEffect(() => {
-    const checkWebGLSupport = () => {
-      try {
-        const canvas = document.createElement("canvas");
-        const gl = canvas.getContext("webgl") as WebGLRenderingContext | null;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
 
-        return (
-          gl &&
-          typeof gl.getExtension === "function" &&
-          gl.getExtension("OES_texture_float")
-        );
-      } catch {
-        return false;
-      }
-    };
+    if (prefersReducedMotion) {
+      console.log("⚠️ Reduced motion preference detected, disabling water effect.");
+      setIsWaterEffectSupported(false);
+      return;
+    }
 
-    if (checkWebGLSupport()) {
+    if (supportsWaterEffect()) {
       console.log("✅ WebGL + OES_texture_float supported! Applying water effect...");
       setIsWaterEffectSupported(true);
     } else {
@@ -40,6 +50,9 @@ export default function Home() {
       setIsWaterEffectSupported(false);
     }
   }, []);
+
+  // Pick resolution based on device width
+  const resolution = typeof window !== "undefined" && window.innerWidth < 768 ? 512 : 1024;
 
   return (
     <div className="pb-8">
@@ -49,8 +62,8 @@ export default function Home() {
         <WaterWaveWrapper
           imageUrl=""
           dropRadius={10}
-          pertubance={0.5} // fixed typo
-          resolution={1024}
+          perturbance={0.5} // ✅ fixed spelling
+          resolution={resolution}
         >
           {() => <AboutSection />}
         </WaterWaveWrapper>

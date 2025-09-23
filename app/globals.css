@@ -2,13 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Global reset */
+/* --- Global reset --- */
 body {
-  @apply bg-gradient-to-b from-white via-gray-50 to-green-50 text-gray-900;
-  font-family: 'Inter', sans-serif;
+  @apply bg-gradient-to-b from-white via-gray-50 to-green-50 text-gray-900 antialiased;
+  font-family: var(--font-main, 'Inter'), sans-serif; /* fallback if font not loaded */
+  @apply text-base sm:text-sm md:text-base; /* responsive font scaling */
+  padding: 0 1rem; /* prevent edge collisions on small screens */
 }
 
-/* Utilities */
+/* --- Utilities --- */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
@@ -28,9 +30,9 @@ body {
     #f59e0b    /* amber-500 (sunset touch) */
   );
   border-radius: 100em;
-  padding: 0.2vw;
-  max-width: 100%;
+  padding: 0.6em 1.2em; /* use ems for better scaling */
   display: inline-block;
+  max-width: 100%;
   transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 .fancy-btn:hover {
@@ -56,9 +58,15 @@ body {
 }
 .line svg {
   position: absolute;
-  height: 100px;
+  height: 60px; /* smaller by default */
   width: 100%;
-  top: -50px;
+  top: -30px;
+}
+@media (min-width: 768px) {
+  .line svg {
+    height: 100px; /* restore size on md+ */
+    top: -50px;
+  }
 }
 .line svg path {
   stroke-width: 1.5px;
@@ -68,12 +76,18 @@ body {
 
 /* --- Decorative box --- */
 .box {
-  height: 40px;
+  height: 30px;
   width: 100%;
   display: flex;
   position: relative;
-  top: -20px;
+  top: -15px;
   z-index: 1;
+}
+@media (min-width: 768px) {
+  .box {
+    height: 40px;
+    top: -20px;
+  }
 }
 
 /* --- Animations --- */
@@ -88,7 +102,7 @@ body {
   }
 }
 .animate-fade-in {
-  animation: fade-in 1s ease-out;
+  animation: fade-in 0.8s ease-out;
 }
 
 .tracking-tighter {

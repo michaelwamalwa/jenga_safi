@@ -15,7 +15,7 @@ export default function DashboardHeader({ user }: { user?: User }) {
   return (
     <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
       <div>
-        <h1 className="text-xl font-semibold">Nexora Dashboard</h1>
+        <h1 className="text-xl font-semibold">JengaSafi Dashboard</h1>
         <p className="text-sm text-gray-500">
           Eco-friendly task management
         </p>
