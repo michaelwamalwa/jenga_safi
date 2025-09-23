@@ -1,5 +1,9 @@
 import { cn } from "@/lib/utils";
-export default function GrainEffect() {
+
+interface GrainEffectProps {
+  opacity? : number;
+}
+export default function GrainEffect({ opacity = 0.08 }: GrainEffectProps) {
   return (
     <div
       className={cn(
@@ -7,6 +11,7 @@ export default function GrainEffect() {
         "before-content-none before:-top-40 before:-left-40 before:w-[calc(100%+20rem)] before:h-[calc(100%+20rem)]",
         "before:fixed before:bg-grain before:opacity-15 pointer-events-none before:animate-noisy-bg"
       )}
+      style={{ opacity }}
     ></div>
   );
 }

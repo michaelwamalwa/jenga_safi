@@ -9,7 +9,7 @@ export default function Profile() {
         <div className="absolute w-full h-full rounded-full">
           <Image
             src={MyImage}
-            alt="Nexora Developer photo"
+            alt="JengaSafi Developer photo"
             className="w-full h-full object-cover rounded-full"
           />
         </div>
@@ -19,7 +19,7 @@ export default function Profile() {
       </div>
 
       {/* Developer text */}
-      <div className="text-3xl font-medium ml-3">Nexora </div>
+      <div className="text-3xl font-medium ml-3">Jenga Safi </div>
     </div>
   );
 }

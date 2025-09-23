@@ -26,13 +26,16 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "types": ["node", "google.maps"]
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "lib/db.js",
+    "app/models/ecotask.ts"
   ],
   "exclude": [
     "node_modules",

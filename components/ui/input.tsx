@@ -8,6 +8,7 @@ interface InputProps {
   value: string;
   onChange: (e:ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
+  className?: string;
   
 }
 const Input: FC<InputProps> = ({ icon, placeholder, type,name, value, onChange, required }) => {

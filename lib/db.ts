@@ -1,29 +1,32 @@
 import mongoose from "mongoose";
 
-const { MONGODB_URI } = process.env;
+import dotenv from "dotenv";
 
-// Track the connection status
-let isConnected: boolean = false;
+dotenv.config({ path: ".env.local" }); // 👈 ensure .env.local is loaded here too
 
-export const connectDB = async (): Promise<void> => {
-  if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not defined in the environment variables.");
+const MONGODB_URI = process.env.MONGODB_URI!;
+
+if (!MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
+}
+
+let cached = (global as any).mongoose;
+
+if (!cached) {
+  cached = (global as any).mongoose = { conn: null, promise: null };
+}
+
+export async function connectDB() {
+  if (cached.conn) {
+    return cached.conn;
   }
 
-  if (isConnected) {
-    console.log("Database is already connected.");
-    return;
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      dbName: "nexora",
+      bufferCommands: false,
+    }).then((mongoose) => mongoose);
   }
-
-  try {
-    const { connection } = await mongoose.connect(MONGODB_URI);
-
-    if (connection.readyState === 1) {
-      isConnected = true;
-      console.log("Database connected successfully!");
-    }
-  } catch (error) {
-    console.error("Database connection failed!", error);
-    throw error; // Rethrow the error for better error handling upstream
-  }
-};
+  cached.conn = await cached.promise;
+  return cached.conn;
+}

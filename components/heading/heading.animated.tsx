@@ -39,7 +39,7 @@ export const HeadingAnimatedSvg: FC<HeadingAnimatedSvg> = ({
       <div
         className={cn(
           "absolute origin-center transition-opacity duration-300",
-          active ? "opacity- animate-spin" : "opacity-0"
+          active ? "opacity-100 animate-spin" : "opacity-0"
         )}
       > 
         <svg 
@@ -57,7 +57,7 @@ export const HeadingAnimatedSvg: FC<HeadingAnimatedSvg> = ({
             <textPath
               href="#curve-wnxkz4"
               startOffset={0}
-              dominantBaseline="Central"
+              dominantBaseline="central"
               style={{
                 fontSize: "14.5px",
                 fontFamily: "Figtree",

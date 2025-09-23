@@ -6,18 +6,17 @@ import Link from "next/link";
 import Card from "@/components/ui/card";
 
 export default function LoginSection() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false); // Loading state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); // Set loading to true
-    setError(''); // Clear previous errors
+    setLoading(true);
+    setError("");
 
-    const formData = new FormData(e.currentTarget);
     const res = await signIn("credentials", {
       email,
       password,
@@ -25,26 +24,45 @@ export default function LoginSection() {
     });
 
     if (res?.error) {
-      setError(res.error); // Display error message
+      setError(res.error);
     } else if (res?.ok) {
-      router.push("/dashboard"); // Redirect on success
+      router.push("/dashboard");
     }
 
-    setLoading(false); // Reset loading state
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center px-4 text-black">
-      <Card className="w-full max-w-md p-6 bg-white shadow-lg rounded-2xl">
-        <p className="text-sm text-gray-500 mt-4 mb-6 text-center">
-          Welcome back to Nexora
+    <section className="relative h-screen flex justify-center items-center px-4 bg-gradient-to-b from-black via-gray-900 to-black text-white overflow-hidden">
+      {/* Glow effect */}
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-green-500 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald-400 rounded-full opacity-20 blur-3xl animate-pulse"></div>
+      </div>
+
+      {/* Login Card */}
+      <Card className="relative z-10 w-full max-w-md p-8 bg-white/80 backdrop-blur-lg border border-green-100 rounded-2xl shadow-xl">
+        {/* Decorative Gradient Bar */}
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-500 via-emerald-400 to-lime-500 rounded-t-2xl opacity-80"></div>
+
+        {/* Title */}
+        <h2 className="text-2xl font-bold text-center text-gray-900">
+          Welcome Back
+        </h2>
+        <p className="text-sm text-gray-600 mt-2 mb-6 text-center">
+          Login to continue building with <span className="text-green-600 font-semibold">Jenga Safi</span>
         </p>
 
         <form className="space-y-6" onSubmit={handleSubmit}>
-          {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+          {error && (
+            <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+          )}
 
           <div className="relative">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <input
@@ -52,7 +70,7 @@ export default function LoginSection() {
               id="email"
               name="email"
               placeholder="example@mail.com"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ease-in-out"
+              className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm text-gray-900 focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-300 ease-in-out"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -60,7 +78,10 @@ export default function LoginSection() {
           </div>
 
           <div className="relative">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -68,7 +89,7 @@ export default function LoginSection() {
               id="password"
               name="password"
               placeholder="Enter your password"
-              className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ease-in-out"
+              className="mt-1 w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm text-gray-900 focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-300 ease-in-out"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -77,19 +98,24 @@ export default function LoginSection() {
 
           <button
             type="submit"
-            disabled={loading} // Disable button when loading
-            className="w-full bg-indigo-600 text-white py-3 px-4 rounded-lg shadow-lg hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all duration-300 ease-in-out disabled:opacity-50"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-green-500 via-emerald-400 to-lime-500 text-white py-3 px-4 rounded-lg shadow-md hover:opacity-90 focus:ring-2 focus:ring-green-400 transition-all duration-300 ease-in-out disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
-       
-          <Link href="/signup" className="text-indigo-600 font-medium hover:underline">
+        {/* Signup link */}
+        <p className="mt-6 text-center text-gray-700">
+          Don’t have an account?{" "}
+          <Link
+            href="/signup"
+            className="text-green-600 font-medium hover:underline"
+          >
             Sign up
           </Link>
-      
+        </p>
       </Card>
-    </div>
+    </section>
   );
 }

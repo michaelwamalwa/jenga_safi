@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import User from "@/app/models/user";
-import { connectDB } from "@/lib/db";
+import { connectDB } from "./db";
 import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
@@ -25,54 +25,30 @@ if (!process.env.JWT_SECRET) {
 }
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
       name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
-      },
+      credentials: { email: {}, password: {} },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) {
-          throw new Error("Email and password are required");
-        }
+        if (!credentials?.email || !credentials.password) return null;
         await connectDB();
-
-        const user = await User.findOne({ email: credentials.email }).select(
-          "+password " // Ensure role is fetched
-        );
-
-        if (!user) {
-          throw new Error("User not found");
-        }
-
-        const isPasswordMatch = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordMatch) {
-          throw new Error("Invalid password");
-        }
-
-        return {
-          id: user._id.toString(),
-          name: user.name,
-          email: user.email,
-          role: user.role
-        };
+        const user = await User.findOne({ email: credentials.email }).select("+password +role");
+        if (!user) return null;
+        const isPasswordMatch = await bcrypt.compare(credentials.password, user.password);
+        if (!isPasswordMatch) return null;
+        return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
       },
     }),
   ],
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
+        token.role = user.role;
       }
       return token;
     },
@@ -81,15 +57,13 @@ export const authOptions: NextAuthOptions = {
         id: token.id as string,
         name: token.name as string,
         email: token.email as string,
-        role: token.role as string
+        role: token.role as string,
       };
       return session;
     },
   },
-  pages: {
-    signIn: "/login",
-    error: "/login",
-  },
+  pages: { signIn: "/login", error: "/login" },
 };
+
 
 export default NextAuth(authOptions);

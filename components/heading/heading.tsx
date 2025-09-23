@@ -6,32 +6,44 @@ interface HeadingProps {
   number: string;
   title_1: string;
   title_2: string;
+  textColor?: string; // now optional
 }
 
-const Heading: FC<HeadingProps> = ({ number, title_1, title_2 }) => {
+const Heading: FC<HeadingProps> = ({ number, title_1, title_2, textColor }) => {
   return (
-    <div className="relative my-10 px-8 z-20">
-      {/* Number Styling */}
-      <div className="outline-none flex flex-col justify-start shrink-0 opacity-5 transform -top-32 2xl:-top-24 w-[71px] flex-none h-auto left-4 lg:left-12 absolute whitespace-pre">
-        <h2 className="font-pixel text-[180px] text-center text-primary-foreground relative">
-          <span className="bottom_fade bg-clip-text text-transparent p-4">
-            {number}
-          </span>
+    <div className="relative my-16 px-6 lg:px-12 z-20">
+      {/* Number in background */}
+      <div className="absolute -top-24 left-6 lg:left-16 opacity-10 pointer-events-none">
+        <h2 className="font-pixel text-[150px] md:text-[200px] text-green-500/80 bg-clip-text text-transparent bg-gradient-to-br from-green-500 via-emerald-400 to-lime-500 drop-shadow-md">
+          {number}
         </h2>
       </div>
-      <div className="flex items-center flex-nowrap min-h-min overflow-hidden p-0 w-full font-oswald">
-        <p className="text-[17vw] lg:text-[12vw] leading-[100%] text-primary-foreground mr-3">
+
+      {/* Titles */}
+      <div className="flex items-center flex-nowrap w-full font-oswald">
+        <p
+          className={`text-[15vw] lg:text-[9vw] leading-[100%] mr-4 drop-shadow-sm ${
+            textColor || "text-white"
+          }`}
+        >
           {title_1}
         </p>
-        <HeadingAnimatedSvg 
-        text="LEARN MORE ABOUT OUR FEATURED PROJECTS"
-        />
-        <p className="text-[17vw] lg:text-[12vw] leading-[100%] text-primary-foreground italic">
+
+        <HeadingAnimatedSvg text="LEARN MORE ABOUT OUR FEATURED PROJECTS" />
+
+        <p
+          className={`text-[15vw] lg:text-[9vw] leading-[100%] italic drop-shadow-sm ${
+            textColor || "text-white"
+          }`}
+        >
           {title_2}
         </p>
       </div>
-      {/* Svg curve */}
-      <SvgCurve />
+
+      {/* Decorative curve */}
+      <div className="absolute left-0 w-full">
+        <SvgCurve />
+      </div>
     </div>
   );
 };

@@ -6,6 +6,7 @@ interface ContactCardProps {
   icon: ReactNode;
   text: string;
   btnText: string;
+  className?: string;
 }
 
 const ContactCard: FC<ContactCardProps> = ({ icon, btnText, text, title }) => {

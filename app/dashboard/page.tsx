@@ -1,108 +1,226 @@
 "use client";
-import { useState, useEffect } from "react";
+
+import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import FloatingLeaves from "./components/floating";
-import EcoStats from "./components/ecostats";
+import ProfileForm from "./components/profile";
+import ClientInfoModal from "./components/clientInfoModal";
+import ProjectList from "./components/projectList";
+import EcoTaskManager from "./components/ecotaskManager";
+import CarbonVisualization from "@/components/environment/carbonnew";
+
+interface Props {
+  siteId: string;
+  carbonEmitted: number;
+  carbonSaved: number;
+  trend: { time: string; emissions: number }[];
+}
 
 export default function DashboardPage() {
-  const [ecoPoints, setEcoPoints] = useState(1240);
-  const [carbonSaved, setCarbonSaved] = useState(42.5);
-  const [waterSaved, setWaterSaved] = useState(1240);
+  const { data: session, status } = useSession();
 
-  const handleTaskComplete = () => {
-    // Animate eco points increase
-    setEcoPoints((prev) => {
-      const newPoints = prev + 50;
-      animateValue(prev, newPoints, setEcoPoints);
-      return newPoints;
-    });
+  const [clientData, setClientData] = useState<any | null>(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("jengasafi-clientProfile");
+      return cached ? JSON.parse(cached) : null;
+    }
 
-    // Animate carbon saved
-    setCarbonSaved((prev) => {
-      const newCarbon = prev + 1.2;
-      animateValue(prev, newCarbon, setCarbonSaved, 1);
-      return newCarbon;
-    });
-  };
+    return null;
+  });
+  const [projects, setProjects] = useState<any[]>([]);
+  const [ecoTasks, setEcoTasks] = useState<any[]>([]);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+  const [hasFetched, setHasFetched] = useState(false);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [showProfileForm, setShowProfileForm] = useState(false);
 
-  const animateValue = (
-    start: number,
-    end: number,
-    setter: (value: number) => void,
-    decimals: number = 0
-  ) => {
-    const duration = 1500;
-    const startTime = performance.now();
+  const fetchData = useCallback(async () => {
+    setLoadingProfile(true);
+    try {
+      // Fetch fresh data from the API
+      const profileRes = await fetch("/api/profile");
 
-    const animate = (currentTime: number) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const value = parseFloat(
-        (start + (end - start) * progress).toFixed(decimals)
-      );
-
-      setter(value);
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
+      if (profileRes.ok) {
+        const profile = await profileRes.json();
+        // Check if the profile actually contains data
+        if (profile && Object.keys(profile).length > 0) {
+          // API returned a valid profile: update state and cache
+          setClientData(profile);
+          localStorage.setItem(
+            "jengasafi-clientProfile",
+            JSON.stringify(profile)
+          );
+        } else {
+          // API successfully returned an empty response: user has no profile
+          setClientData(null);
+          localStorage.removeItem("jengasafi-clientProfile"); // Only clear on confirmed empty response
+        }
+      } else {
+        // Handle HTTP errors (e.g., 401, 500). DO NOT clear cache on error.
+        console.error("Failed to fetch profile, status:", profileRes.status);
+        // Optionally, you could set an error state here, but don't clear the cached data.
+        // The component will continue to use the cached data from the initial state.
       }
-    };
 
-    requestAnimationFrame(animate);
+      // ... rest of your fetch logic for projects and tasks ...
+      const projectsRes = await fetch("/api/projects");
+      if (projectsRes.ok) setProjects(await projectsRes.json());
+
+      const tasksRes = await fetch("/api/ecotasks");
+      if (tasksRes.ok) setEcoTasks(await tasksRes.json());
+    } catch (err) {
+      // Handle network errors. DO NOT clear cache on error.
+      console.error("❌ Network error fetching dashboard data:", err);
+      // Leave clientData and localStorage unchanged, using the cached value.
+    } finally {
+      setHasFetched(true);
+      setLoadingProfile(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status === "authenticated" && !hasFetched) {
+      fetchData();
+    }
+  }, [status, hasFetched, fetchData]);
+
+  const handleProfileSave = (profile: any) => {
+    setClientData(profile);
+    localStorage.setItem("jengasafi-clientProfile", JSON.stringify(profile));
+
+    setShowProfileForm(false);
   };
+
+  const addProject = (p: any) => setProjects((prev) => [...prev, p]);
+  const addEcoTask = (t: any) => setEcoTasks((prev) => [...prev, t]);
+  const updateEcoTask = (t: any) =>
+    setEcoTasks((prev) => prev.map((x) => (x._id === t._id ? t : x)));
+
+  // --- render ---
+  if (status === "loading" || (status === "authenticated" && loadingProfile)) {
+    return (
+      <div className="text-center text-gray-500 p-8">
+        Loading your dashboard…
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return (
+      <div className="text-center text-red-500 p-8">
+        You must be signed in to view this page.
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-cyan-50 relative">
-      <FloatingLeaves />
+    <div className="p-8 space-y-12 max-w-7xl mx-auto">
+      <header className="space-y-2">
+        <h1 className="text-4xl font-bold text-emerald-700">
+          Sustainability Dashboard
+        </h1>
+        <p className="text-gray-600 text-lg">
+          Welcome, {session?.user?.name || "Guest"}!
+        </p>
+      </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <motion.div
-          className="mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h1 className="text-3xl font-bold text-emerald-800 flex items-center gap-3">
-            <span className="bg-green-100 p-3 rounded-xl">🌱</span>
-            <div>
-              Nexora Dashboard
-              <p className="text-lg font-normal text-emerald-600">
-                Eco-friendly task management
+      {loadingProfile && (
+        <div className="text-gray-500 text-center">Loading profile…</div>
+      )}
+
+      {!loadingProfile && hasFetched && !clientData && (
+        <ClientInfoModal onSave={handleProfileSave} />
+      )}
+
+      {!loadingProfile && clientData && (
+        <div className="space-y-10">
+          {/* Profile Card */}
+          <motion.div
+            className="bg-white rounded-2xl p-8 shadow-md max-w-4xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+          >
+            <h2 className="text-2xl font-bold text-emerald-700 mb-4">
+              Welcome back, {clientData.name}! 🌱
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
+              <p>
+                <strong>Email:</strong> {clientData.email}
               </p>
             </div>
-          </h1>
-        </motion.div>
+            <div className="mt-6 flex justify-start">
+              <button
+                onClick={() => setShowProfileForm(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg transition"
+              >
+                Edit Profile
+              </button>
+            </div>
+          </motion.div>
 
-        <EcoStats
-          ecoPoints={ecoPoints}
-          carbonSaved={carbonSaved}
-          waterSaved={waterSaved}
-        />
-        <motion.div
-          className="mt-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl p-8 text-white"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">
-              Join the Sustainability Movement
-            </h2>
-            <p className="mb-6 text-green-100">
-              Every task you complete contributes to our collective
-              environmental impact. Together we've saved {carbonSaved}kg of CO2
-              and {waterSaved}L of water this month!
-            </p>
-            <motion.button
-              className="bg-white text-emerald-700 font-bold px-6 py-3 rounded-full hover:bg-green-50 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Share Your Impact
-            </motion.button>
+          {/* Tabs */}
+          <div className="border-b border-gray-200 flex space-x-4">
+            {["overview", "projects", "eco-tasks"].map((tab) => (
+              <button
+                key={tab}
+                className={`px-4 py-2 font-medium transition ${
+                  activeTab === tab
+                    ? "text-emerald-600 border-b-2 border-emerald-600"
+                    : "text-gray-500 hover:text-gray-700"
+                }`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab.charAt(0).toUpperCase() + tab.slice(1).replace("-", " ")}
+              </button>
+            ))}
           </div>
-        </motion.div>
-      </div>
+
+          {/* Tab Content */}
+          <div className="space-y-8">
+            {activeTab === "overview" && (
+              <div className="flex flex-col lg:flex-row lg:space-x-8 gap-8">
+                <div className="flex-1 bg-white p-8 rounded-2xl shadow-md">
+                  <CarbonVisualization
+                    siteId="all"
+                    carbonEmitted={clientData.carbonEmitted}
+                    carbonSaved={clientData.carbonSaved}
+                    trend={[
+                      {
+                        time: new Date().toISOString(),
+                        emissions: clientData.carbonEmitted,
+                        savings: clientData.carbonSaved,
+                        net: clientData.carbonEmitted - clientData.carbonSaved,
+                      },
+                    ]}
+                  />
+                </div>
+              </div>
+            )}
+
+            {activeTab === "projects" && (
+              <ProjectList projects={projects} onAddProject={addProject} />
+            )}
+
+            {activeTab === "eco-tasks" && (
+              <EcoTaskManager
+                tasks={ecoTasks}
+                projects={projects}
+                onAddTask={addEcoTask}
+                onUpdateTask={updateEcoTask}
+              />
+            )}
+          </div>
+        </div>
+      )}
+
+      {showProfileForm && (
+        <ProfileForm
+          initialData={clientData}
+          onSave={handleProfileSave}
+          onCancel={() => setShowProfileForm(false)}
+        />
+      )}
     </div>
   );
 }
