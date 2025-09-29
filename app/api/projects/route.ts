@@ -1,4 +1,3 @@
-// app/api/projects/route.ts
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -29,21 +28,12 @@ export async function POST(req: Request) {
   await connectDB();
 
   const data = await req.json();
-  
-  // Calculate total emissions
-  const emissions = {
-    energy: data.emissions?.energy || 0,
-    paper: data.emissions?.paper || 0,
-    travel: data.emissions?.travel || 0,
-    total: (data.emissions?.energy || 0) * 0.85 + // 0.85 kg CO₂ per kWh
-           (data.emissions?.paper || 0) * 2.5 +  // 2.5 kg CO₂ per ream
-           (data.emissions?.travel || 0) * 0.21  // 0.21 kg CO₂ per km (average)
-  };
 
   const project = await Project.create({
     ...data,
+    startDate: new Date(data.startDate),
+    endDate: new Date(data.endDate),
     userId: session.user?.email,
-    emissions
   });
 
   return NextResponse.json(project);

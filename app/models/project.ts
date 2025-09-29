@@ -1,34 +1,20 @@
-// models/Project.ts
-import mongoose from "mongoose";
+import mongoose, { Schema, models, model } from "mongoose";
 
-const ProjectSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  siteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "ConstructionSite",
-    required: true,
-  },
-  description: String,
-  startDate: Date,
-  endDate: Date,
-  emissions: {
-    energy: { type: Number, default: 0 },
-    paper: { type: Number, default: 0 },
-    travel: { type: Number, default: 0 },
-    total: { type: Number, default: 0 },
-  },
-  sustainabilityGoals: [String],
-  status: {
-    type: String,
-    enum: ["planning", "active", "completed", "on-hold"],
-    default: "planning",
-  },
-}, { timestamps: true });
+const projectSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    description: String,
+    location: String,
+    startDate: Date,
+    endDate: Date,
+    userId: { type: String, required: true },
 
-const Project =
-  mongoose.models.Project || mongoose.model("Project", ProjectSchema);
+    // 🔑 Must match your Site model _id type
+    siteId: { type: Schema.Types.ObjectId, ref: "Site", required: true },
+  },
+  { timestamps: true }
+);
+
+const Project = models.Project || model("Project", projectSchema);
 
 export default Project;

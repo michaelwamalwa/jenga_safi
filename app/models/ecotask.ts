@@ -1,36 +1,27 @@
-import mongoose, { Schema, Document, Model } from 'mongoose';
+import mongoose, { Schema, model, models } from "mongoose";
 
-interface IEcoTask extends Document {
-  title: string;
-  description?: string;
-  siteId: mongoose.Types.ObjectId;
-  projectId?: mongoose.Types.ObjectId;
-  materials?: string[];
-  deadline?: Date;
-  priority: 'low' | 'medium' | 'high';
-  ecoImpact: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in-progress' | 'completed' | 'cancelled';
-  assignedTo?: string;
-  estimatedCarbonSavings: number;
-  actualCarbonSavings: number;
-}
+const ecoTaskSchema = new Schema(
+  {
+    title: { type: String, required: true },
+    description: String,
+    site: { type: String, required: true },
+    materials: [String],
+    deadline: { type: Date, required: true },
+    priority: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+    ecoImpact: { type: String, enum: ["low", "medium", "high"], default: "medium" },
+    status: { type: String, enum: ["pending", "in-progress", "completed"], default: "pending" },
+    assignedTo: { type: String, required: true },
+    estimatedCarbonSavings: { type: Number, default: 0 },
+    actualCarbonSavings: { type: Number, default: 0 },
 
-const EcoTaskSchema: Schema<IEcoTask> = new Schema({
-  title: { type: String, required: true },
-  description: String,
-  siteId: { type: Schema.Types.ObjectId, ref: 'ConstructionSite', required: true },
-  projectId: { type: Schema.Types.ObjectId, ref: 'Project' },
-  materials: [String],
-  deadline: Date,
-  priority: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
-  ecoImpact: { type: String, enum: ['low', 'medium', 'high'], default: 'medium' },
-  status: { type: String, enum: ['pending', 'in-progress', 'completed', 'cancelled'], default: 'pending' },
-  assignedTo: String,
-  estimatedCarbonSavings: { type: Number, default: 0 },
-  actualCarbonSavings: { type: Number, default: 0 },
-}, { timestamps: true });
+    // 🔑 Link to Project
+    projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true },
 
-// Prevent OverwriteModelError
-const EcoTask: Model<IEcoTask> = mongoose.models.EcoTask || mongoose.model<IEcoTask>('EcoTask', EcoTaskSchema);
+    // Optional: track user
+    userId: { type: String }
+  },
+  { timestamps: true }
+);
 
+const EcoTask = models.EcoTask || model("EcoTask", ecoTaskSchema);
 export default EcoTask;
