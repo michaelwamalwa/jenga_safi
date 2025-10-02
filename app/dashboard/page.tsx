@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [hasFetched, setHasFetched] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [showProfileForm, setShowProfileForm] = useState(false);
+  const profileForDisplay = clientData ? (clientData.profile ?? clientData) : null;
+
 
   // 👇 Create user-specific localStorage key
   const getStorageKey = useCallback(() => {
@@ -145,7 +147,7 @@ export default function DashboardPage() {
         <div className="space-y-10">
           {/* Profile Card */}
           <ProfileDisplay
-            clientData={clientData}
+            clientData={profileForDisplay}
             session={session}
             onEdit={() => setShowProfileForm(true)}
           />
