@@ -2,23 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
-import { motion } from "framer-motion";
 import ProfileForm from "./components/profile";
 import ClientInfoModal from "./components/clientInfoModal";
 import ProjectList from "./components/projectList";
 import EcoTaskManager from "./components/ecotaskManager";
 import CarbonVisualization from "@/components/environment/carbonnew";
 import { ProfileDisplay } from "./profile";
-interface Props {
-  siteId: string;
-  carbonEmitted: number;
-  carbonSaved: number;
-  trend: { 
-    time: string; 
-    emissions: number;
-    savings: number;
-    net: number }[];
-}
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -34,14 +23,14 @@ export default function DashboardPage() {
 
   // 👇 Create user-specific localStorage key
   const getStorageKey = useCallback(() => {
-    return session?.user?.email 
+    return session?.user?.email
       ? `jengasafi-clientProfile-${session.user.email}`
-      : 'jengasafi-clientProfile-anonymous';
+      : "jengasafi-clientProfile-anonymous";
   }, [session?.user?.email]);
 
   const fetchData = useCallback(async () => {
     if (status !== "authenticated") return;
-    
+
     setLoadingProfile(true);
     try {
       // Fetch fresh data from the API
@@ -96,19 +85,18 @@ export default function DashboardPage() {
       setProjects([]);
       setEcoTasks([]);
       setHasFetched(false);
+      Object.keys(sessionStorage).forEach((k) => {
+        if (k.startsWith("jengasafi-clientProfile-")) {
+          sessionStorage.removeItem(k);
+        }
+      });
     }
-
-    Object.keys(sessionStorage).forEach((k) => {
-      if (k.startsWith("jengasafi-clientProfile-")){
-        sessionStorage.removeItem(k);
-      }
-    })
   }, [status]);
 
   const handleProfileSave = (profile: any) => {
     setClientData(profile);
     // 👇 Store with user-specific key
-    localStorage.setItem(getStorageKey(), JSON.stringify(profile));
+    sessionStorage.setItem(getStorageKey(), JSON.stringify(profile));
     setShowProfileForm(false);
   };
 
@@ -149,10 +137,6 @@ export default function DashboardPage() {
         </p>
       </header>
 
-      {loadingProfile && (
-        <div className="text-gray-500 text-center">Loading profile…</div>
-      )}
-
       {!loadingProfile && hasFetched && !clientData && (
         <ClientInfoModal onSave={handleProfileSave} />
       )}
@@ -190,14 +174,16 @@ export default function DashboardPage() {
                 <div className="flex-1 bg-white p-8 rounded-2xl shadow-md">
                   <CarbonVisualization
                     siteId="all"
-                    carbonEmitted={clientData.carbonEmitted}
-                    carbonSaved={clientData.carbonSaved}
+                    carbonEmitted={clientData?.carbonEmitted ?? 0}
+                    carbonSaved={clientData?.carbonSaved ?? 0}
                     trend={[
                       {
                         time: new Date().toISOString(),
-                        emissions: clientData.carbonEmitted,
-                        savings: clientData.carbonSaved,
-                        net: clientData.carbonEmitted - clientData.carbonSaved,
+                        emissions: clientData?.carbonEmitted ?? 0,
+                        savings: clientData?.carbonSaved ?? 0,
+                        net:
+                          (clientData?.carbonEmitted ?? 0) -
+                          (clientData?.carbonSaved ?? 0),
                       },
                     ]}
                   />
@@ -215,19 +201,21 @@ export default function DashboardPage() {
                 projects={projects}
                 onAddTask={addEcoTask}
                 onUpdateTask={updateEcoTask}
-                onDeleteTask={deleteEcoTask} 
+                onDeleteTask={deleteEcoTask}
               />
             )}
           </div>
         </div>
       )}
-
       {showProfileForm && (
         <ProfileForm
           initialData={clientData}
           onSave={handleProfileSave}
           onCancel={() => setShowProfileForm(false)}
         />
+      )}
+      {loadingProfile && (
+        <div className="text-gray-500 text-center">Loading profile…</div>
       )}
     </div>
   );

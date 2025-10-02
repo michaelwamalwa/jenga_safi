@@ -161,7 +161,6 @@ export default function ClientInfoModal({ onSave }: ClientInfoModalProps) {
         const sitePayload = {
           ...site,
           userId: session?.user?.email,
-          profileId: savedProfile._id || savedProfile.id
         };
         
         console.log(`🏗️ Saving site ${index + 1}...`, sitePayload);
@@ -198,7 +197,7 @@ export default function ClientInfoModal({ onSave }: ClientInfoModalProps) {
   
         console.log(`🌱 Creating carbon data for site ${index + 1}...`, carbonPayload);
   
-        const carbonRes = await fetch("/api/carbon-data", {
+        const carbonRes = await fetch("/api/carbon-data/initialize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(carbonPayload),
@@ -569,7 +568,7 @@ export default function ClientInfoModal({ onSave }: ClientInfoModalProps) {
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
           <h2 className="text-2xl font-bold mb-2">Welcome to JengaSafi! 🌱</h2>
@@ -601,7 +600,7 @@ export default function ClientInfoModal({ onSave }: ClientInfoModalProps) {
         </div>
 
         {/* Content */}
-        <div className="p-6 max-h-[60vh] overflow-y-auto">
+        <div className="p-6 flex-1 overflow-y-auto">
           {currentStep === 1 && renderStep1()}
           {currentStep === 2 && renderStep2()}
           {currentStep === 3 && renderStep3()}

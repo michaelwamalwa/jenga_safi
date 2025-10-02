@@ -7,16 +7,17 @@ import { authOptions } from "@/lib/auth";
 
 export async function GET() {
   await connectDB();
-  
+
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const sites = await Site.find({ userId: session.user.email })
-      .sort({ createdAt: -1 });
+    const sites = await Site.find({ userId: session.user.email }).sort({
+      createdAt: -1,
+    });
 
     return NextResponse.json(sites);
   } catch (err: any) {
@@ -27,7 +28,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   await connectDB();
-  
+
   try {
     const session = await getServerSession(authOptions);
     const body = await req.json();
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     // Validate required fields
     if (!body.name || !body.location) {
       return NextResponse.json(
-        { error: "Site name and location are required" }, 
+        { error: "Site name and location are required" },
         { status: 400 }
       );
     }
@@ -49,17 +50,29 @@ export async function POST(req: Request) {
       profileId: body.profileId || undefined,
       name: body.name,
       location: body.location,
-      projectType: body.projectType || 'residential',
+      projectType: body.projectType || "residential",
       size: body.size || "",
       startDate: new Date(body.startDate),
       endDate: body.endDate ? new Date(body.endDate) : undefined,
       budget: body.budget || "",
-      status: 'planned'
+      status: "planned",
     };
 
     const site = await Site.create(siteData);
 
-    return NextResponse.json(site);
+    return NextResponse.json({
+      _id: site._id.toString(),
+      name: site.name,
+      location: site.location,
+      projectType: site.projectType,
+      size: site.size,
+      startDate: site.startDate,
+      endDate: site.endDate,
+      budget: site.budget,
+      status: site.status,
+      userId: site.userId,
+      profileId: site.profileId,
+    });
   } catch (err: any) {
     console.error("Error saving site:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });

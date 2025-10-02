@@ -30,6 +30,14 @@ export const emissionFactors = {
     trend: { time: string; emissions: number; savings: number; net: number }[];
     forecast?: { time: string; emissions: number; savings: number; net: number }[];
   }
+  export const emptyCarbonData: CarbonData = {
+    activities: [],
+    totalEmissions: 0,
+    totalSavings: 0,
+    netEmissions: 0,
+    trend: [],
+    forecast: [],
+  };
   
   // ---------- Carbon Calculation Functions ----------
   export const calculateEmissions = (activity: CarbonActivity): number => {
@@ -67,10 +75,14 @@ export const emissionFactors = {
   };
   
   export const calculateEfficiencyScore = (data: CarbonData): string => {
-    if (data.totalEmissions === 0) return 'A+';
-    const efficiency = (data.totalSavings / data.totalEmissions) * 100;
+    const emissions = data.totalEmissions ?? 0;
+    const savings = data.totalSavings ?? 0;
+  
+    if (emissions === 0) return 'A+';
+    const efficiency = (savings / emissions) * 100;
     if (efficiency >= 50) return 'A';
     if (efficiency >= 30) return 'B';
     if (efficiency >= 10) return 'C';
     return 'D';
   };
+  

@@ -1,4 +1,3 @@
-// app/api/carbon-data/initialize/route.ts
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import CarbonData from "@/app/models/carbon-data";
@@ -7,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 
 export async function POST(req: Request) {
   await connectDB();
-  
+
   try {
     const session = await getServerSession(authOptions);
     const body = await req.json();
@@ -16,15 +15,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Validate required fields
-    if (!body.siteId || !body.profileId) {
-      return NextResponse.json(
-        { error: "Site ID and Profile ID are required" }, 
-        { status: 400 }
-      );
+    if (!body.siteId) {
+      return NextResponse.json({ error: "Site ID is required" }, { status: 400 });
     }
 
-    // Check if carbon data already exists for this site
+    // Check existing carbon data
     const existingData = await CarbonData.findOne({ siteId: body.siteId });
     if (existingData) {
       return NextResponse.json(existingData);
@@ -32,7 +27,6 @@ export async function POST(req: Request) {
 
     const carbonData = await CarbonData.create({
       siteId: body.siteId,
-      profileId: body.profileId,
       userId: session.user.email,
       reductionTarget: body.reductionTarget || 25,
       focusAreas: body.focusAreas || [],
@@ -47,10 +41,10 @@ export async function POST(req: Request) {
         transportation: 0,
         waste: 0,
         water: 0,
-        other: 0
+        other: 0,
       },
       monthlyData: [],
-      status: 'active'
+      status: "active",
     });
 
     return NextResponse.json(carbonData);
