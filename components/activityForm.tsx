@@ -222,7 +222,7 @@ export function ActivityForm({ siteId, onActivityAdded }: ActivityFormProps) {
       value: Number(newActivity.value),
     };
 
-    let activityToAdd: any = { ...baseActivity, type: newActivity.type };
+    const activityToAdd: any = { ...baseActivity, type: newActivity.type };
 
     if (newActivity.type === "energy" || newActivity.type === "machinery") {
       activityToAdd.fuelType = newActivity.fuelType;
