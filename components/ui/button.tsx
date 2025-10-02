@@ -2,11 +2,13 @@ import { cn } from "@/lib/utils";
 import Link from "@/node_modules/next/link";
 import { FC, ReactNode,ButtonHTMLAttributes } from "react";
 
+type Variant = "default" | "outline" | "ghost";
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
   link?: string;
   isIcon?: boolean;
   className?: string;
+  variant?: Variant;
 }
 
 const Button: FC<ButtonProps> = ({ children, className, isIcon, link, ...props }) => {

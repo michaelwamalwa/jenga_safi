@@ -15,7 +15,10 @@ interface Task {
   priority: "low" | "medium" | "high";
   impact: "low" | "medium" | "high";
   status: "todo" | "in-progress" | "done";
-  projectId?: string; // link to project
+  projectId: string;
+  estimatedCarbonReduction?: number;
+  dueDate?: string;
+  assignedTo?: string;
 }
 
 interface EcoTaskManagerProps {
@@ -23,6 +26,7 @@ interface EcoTaskManagerProps {
   projects: Project[];
   onAddTask: (task: Task) => void;
   onUpdateTask: (task: Task) => void;
+onDeleteTask: (taskId: string) => void;
 }
 
 export default function EcoTaskManager({
@@ -30,15 +34,17 @@ export default function EcoTaskManager({
   projects,
   onAddTask,
   onUpdateTask,
+  onDeleteTask,
 }: EcoTaskManagerProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState<Partial<Task>>({
     title: "",
     description: "",
     priority: "medium",
     impact: "medium",
     status: "todo",
-    projectId: projects.length > 0 ? projects[0]._id : undefined, // default first project
+    projectId: projects.length > 0 ? projects[0]._id : "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,7 +66,7 @@ export default function EcoTaskManager({
           priority: "medium",
           impact: "medium",
           status: "todo",
-          projectId: projects.length > 0 ? projects[0]._id : undefined,
+          projectId: projects.length > 0 ? projects[0]._id : "",
         });
       }
     } catch (err) {
@@ -68,11 +74,50 @@ export default function EcoTaskManager({
     }
   };
 
+  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+
+      if (res.ok) {
+        const updatedTask = await res.json();
+        onUpdateTask(updatedTask);
+        setEditingTask(null);
+      }
+    } catch (err) {
+      console.error("Error updating task:", err);
+    }
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      const res = await fetch(`/api/tasks/${taskId}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        onDeleteTask(taskId);
+      }
+    } catch (err) {
+      console.error("Error deleting task:", err);
+    }
+  };
+
+  const handleStatusChange = (taskId: string, newStatus: Task["status"]) => {
+    handleUpdateTask(taskId, { status: newStatus });
+  };
+
   return (
     <div className="bg-white p-6 rounded-2xl shadow-md">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-bold text-emerald-700">Eco Task Manager</h3>
+        <div>
+          <h3 className="text-xl font-bold text-emerald-700">Eco Task Manager</h3>
+          <p className="text-sm text-gray-600">Manage sustainability tasks and track environmental impact</p>
+        </div>
         <button
           onClick={() => setShowAddForm(true)}
           className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-medium"
@@ -89,13 +134,13 @@ export default function EcoTaskManager({
           className="mb-6 p-6 bg-gray-50 rounded-lg border border-gray-200"
         >
           <h4 className="font-medium text-emerald-800 mb-4 text-lg">
-            Add New Task
+            Add New Sustainability Task
           </h4>
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Title */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Title*
+                Task Title*
               </label>
               <input
                 type="text"
@@ -105,6 +150,7 @@ export default function EcoTaskManager({
                 onChange={(e) =>
                   setNewTask({ ...newTask, title: e.target.value })
                 }
+                placeholder="e.g., Install solar panels, Implement waste sorting"
               />
             </div>
 
@@ -120,6 +166,7 @@ export default function EcoTaskManager({
                 onChange={(e) =>
                   setNewTask({ ...newTask, description: e.target.value })
                 }
+                placeholder="Describe the task and its environmental impact..."
               />
             </div>
 
@@ -134,6 +181,7 @@ export default function EcoTaskManager({
                   setNewTask({ ...newTask, projectId: e.target.value })
                 }
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                required
               >
                 {projects.map((p) => (
                   <option key={p._id} value={p._id}>
@@ -166,10 +214,10 @@ export default function EcoTaskManager({
                 </select>
               </div>
 
-              {/* Impact */}
+              {/* Environmental Impact */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Impact
+                  Environmental Impact
                 </label>
                 <select
                   value={newTask.impact}
@@ -181,9 +229,9 @@ export default function EcoTaskManager({
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  <option value="low">Low Impact</option>
+                  <option value="medium">Medium Impact</option>
+                  <option value="high">High Impact</option>
                 </select>
               </div>
 
@@ -207,6 +255,26 @@ export default function EcoTaskManager({
                   <option value="done">Done</option>
                 </select>
               </div>
+            </div>
+
+            {/* Estimated Carbon Reduction */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Estimated Carbon Reduction (kg CO₂)
+              </label>
+              <input
+                type="number"
+                step="0.1"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                value={newTask.estimatedCarbonReduction || ""}
+                onChange={(e) =>
+                  setNewTask({ 
+                    ...newTask, 
+                    estimatedCarbonReduction: e.target.value ? Number(e.target.value) : undefined 
+                  })
+                }
+                placeholder="e.g., 150.5"
+              />
             </div>
 
             {/* Actions */}
@@ -237,18 +305,38 @@ export default function EcoTaskManager({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             className="p-5 border border-gray-200 rounded-lg hover:shadow-md transition-shadow cursor-pointer bg-white"
+            onClick={() => setEditingTask(task)}
           >
-            <h4 className="font-bold text-emerald-800 mb-2 text-lg">
-              {task.title}
-            </h4>
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="font-bold text-emerald-800 text-lg flex-1">
+                {task.title}
+              </h4>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteTask(task._id!);
+                }}
+                className="text-gray-400 hover:text-red-500 ml-2"
+              >
+                ×
+              </button>
+            </div>
+            
             <p className="text-sm text-gray-700 mb-3 line-clamp-3">
               {task.description}
             </p>
+            
+            {task.estimatedCarbonReduction && (
+              <div className="mb-3 p-2 bg-blue-50 rounded-md">
+                <p className="text-xs text-blue-700 font-medium">
+                  Estimated Reduction: {task.estimatedCarbonReduction} kg CO₂
+                </p>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                Project:{" "}
-                {projects.find((p) => p._id === task.projectId)?.name ||
-                  "Unassigned"}
+                {projects.find((p) => p._id === task.projectId)?.name || "Unassigned"}
               </span>
               <span
                 className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -259,7 +347,7 @@ export default function EcoTaskManager({
                     : "bg-green-100 text-green-700"
                 }`}
               >
-                {task.priority}
+                {task.priority} priority
               </span>
               <span
                 className={`px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -270,10 +358,13 @@ export default function EcoTaskManager({
                     : "bg-gray-100 text-gray-700"
                 }`}
               >
-                {task.impact}
+                {task.impact} impact
               </span>
-              <span
-                className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+              <select
+                value={task.status}
+                onChange={(e) => handleStatusChange(task._id!, e.target.value as Task["status"])}
+                onClick={(e) => e.stopPropagation()}
+                className={`px-2.5 py-1 rounded-full text-xs font-medium border-0 focus:ring-2 focus:ring-emerald-500 ${
                   task.status === "done"
                     ? "bg-emerald-100 text-emerald-700"
                     : task.status === "in-progress"
@@ -281,8 +372,10 @@ export default function EcoTaskManager({
                     : "bg-gray-100 text-gray-700"
                 }`}
               >
-                {task.status}
-              </span>
+                <option value="todo">To Do</option>
+                <option value="in-progress">In Progress</option>
+                <option value="done">Done</option>
+              </select>
             </div>
           </motion.div>
         ))}
@@ -291,7 +384,7 @@ export default function EcoTaskManager({
       {/* Empty State */}
       {tasks.length === 0 && !showAddForm && (
         <div className="text-center py-12 text-gray-500">
-          <p>No tasks yet. Add your first task to get started.</p>
+          <p>No sustainability tasks yet. Add your first task to get started.</p>
         </div>
       )}
     </div>

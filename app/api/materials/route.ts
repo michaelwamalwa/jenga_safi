@@ -1,30 +1,28 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { SustainableMaterial } from '@/types';
+// app/api/materials/route.ts
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import SustainableMaterial from "@/app/models/sustainableMaterial";
 
 export async function GET() {
   try {
-    // This would connect to your database (MongoDB, PostgreSQL, etc.)
-    // For now, returns empty array - you'll implement the database connection
-    const materials: SustainableMaterial[] = []; 
+    await connectDB();
+    const materials = await SustainableMaterial.find().populate('supplier');
     return NextResponse.json(materials);
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to fetch materials' },
-      { status: 500 }
-    );
+    console.error("Error fetching materials:", error);
+    return NextResponse.json({ error: "Failed to fetch materials" }, { status: 500 });
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-    // Validate and save to database
-    // const newMaterial = await saveMaterial(body);
-    return NextResponse.json(body, { status: 201 });
+    await connectDB();
+    const body = await req.json();
+    
+    const material = await SustainableMaterial.create(body);
+    return NextResponse.json(material, { status: 201 });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to create material' },
-      { status: 500 }
-    );
+    console.error("Error creating material:", error);
+    return NextResponse.json({ error: "Failed to create material" }, { status: 500 });
   }
 }

@@ -15,7 +15,6 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Find profile by user email
     const profile = await SustainabilityProfile.findOne({ 
       email: session.user.email 
     });
@@ -42,11 +41,24 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    // Extract only the fields we want to save
+    const profileData = {
+      userId: session.user.email,
+      name: body.name,
+      email: body.email,
+      company: body.company || "",
+      role: body.role || "",
+      sustainabilityGoals: body.sustainabilityGoals || "",
+      reductionTarget: body.reductionTarget || 25,
+      focusAreas: body.focusAreas || [],
+      setupCompleted: body.setupCompleted || false
+    };
+
     // Update or create profile
     const profile = await SustainabilityProfile.findOneAndUpdate(
       { email: session.user.email },
-      { ...body, userId: session.user.email },
-      { new: true, upsert: true }
+      profileData,
+      { new: true, upsert: true, runValidators: true }
     );
 
     return NextResponse.json(profile);

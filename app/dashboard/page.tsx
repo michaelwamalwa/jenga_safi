@@ -8,25 +8,23 @@ import ClientInfoModal from "./components/clientInfoModal";
 import ProjectList from "./components/projectList";
 import EcoTaskManager from "./components/ecotaskManager";
 import CarbonVisualization from "@/components/environment/carbonnew";
-
+import { ProfileDisplay } from "./profile";
 interface Props {
   siteId: string;
   carbonEmitted: number;
   carbonSaved: number;
-  trend: { time: string; emissions: number }[];
+  trend: { 
+    time: string; 
+    emissions: number;
+    savings: number;
+    net: number }[];
 }
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
 
-  const [clientData, setClientData] = useState<any | null>(() => {
-    if (typeof window !== "undefined") {
-      const cached = localStorage.getItem("jengasafi-clientProfile");
-      return cached ? JSON.parse(cached) : null;
-    }
-
-    return null;
-  });
+  // 👇 REMOVE localStorage initialization - start with null
+  const [clientData, setClientData] = useState<any | null>(null);
   const [projects, setProjects] = useState<any[]>([]);
   const [ecoTasks, setEcoTasks] = useState<any[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(true);
@@ -34,49 +32,56 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showProfileForm, setShowProfileForm] = useState(false);
 
+  // 👇 Create user-specific localStorage key
+  const getStorageKey = useCallback(() => {
+    return session?.user?.email 
+      ? `jengasafi-clientProfile-${session.user.email}`
+      : 'jengasafi-clientProfile-anonymous';
+  }, [session?.user?.email]);
+
   const fetchData = useCallback(async () => {
+    if (status !== "authenticated") return;
+    
     setLoadingProfile(true);
     try {
       // Fetch fresh data from the API
       const profileRes = await fetch("/api/profile");
-
       if (profileRes.ok) {
         const profile = await profileRes.json();
-        // Check if the profile actually contains data
         if (profile && Object.keys(profile).length > 0) {
-          // API returned a valid profile: update state and cache
           setClientData(profile);
-          localStorage.setItem(
-            "jengasafi-clientProfile",
-            JSON.stringify(profile)
-          );
+          // 👇 Store with user-specific key
+          sessionStorage.setItem(getStorageKey(), JSON.stringify(profile));
         } else {
-          // API successfully returned an empty response: user has no profile
           setClientData(null);
-          localStorage.removeItem("jengasafi-clientProfile"); // Only clear on confirmed empty response
+          sessionStorage.removeItem(getStorageKey());
         }
       } else {
-        // Handle HTTP errors (e.g., 401, 500). DO NOT clear cache on error.
         console.error("Failed to fetch profile, status:", profileRes.status);
-        // Optionally, you could set an error state here, but don't clear the cached data.
-        // The component will continue to use the cached data from the initial state.
+        // On error, try to load from cache as fallback
+        const cached = sessionStorage.getItem(getStorageKey());
+        if (cached) {
+          setClientData(JSON.parse(cached));
+        }
       }
 
-      // ... rest of your fetch logic for projects and tasks ...
       const projectsRes = await fetch("/api/projects");
       if (projectsRes.ok) setProjects(await projectsRes.json());
 
       const tasksRes = await fetch("/api/ecotasks");
       if (tasksRes.ok) setEcoTasks(await tasksRes.json());
     } catch (err) {
-      // Handle network errors. DO NOT clear cache on error.
       console.error("❌ Network error fetching dashboard data:", err);
-      // Leave clientData and localStorage unchanged, using the cached value.
+      // On network error, try cached data
+      const cached = sessionStorage.getItem(getStorageKey());
+      if (cached) {
+        setClientData(JSON.parse(cached));
+      }
     } finally {
       setHasFetched(true);
       setLoadingProfile(false);
     }
-  }, []);
+  }, [status, getStorageKey]);
 
   useEffect(() => {
     if (status === "authenticated" && !hasFetched) {
@@ -84,17 +89,37 @@ export default function DashboardPage() {
     }
   }, [status, hasFetched, fetchData]);
 
+  // 👇 Clear data when user logs out
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      setClientData(null);
+      setProjects([]);
+      setEcoTasks([]);
+      setHasFetched(false);
+    }
+
+    Object.keys(sessionStorage).forEach((k) => {
+      if (k.startsWith("jengasafi-clientProfile-")){
+        sessionStorage.removeItem(k);
+      }
+    })
+  }, [status]);
+
   const handleProfileSave = (profile: any) => {
     setClientData(profile);
-    localStorage.setItem("jengasafi-clientProfile", JSON.stringify(profile));
-
+    // 👇 Store with user-specific key
+    localStorage.setItem(getStorageKey(), JSON.stringify(profile));
     setShowProfileForm(false);
   };
 
+  // Project and Task handlers
   const addProject = (p: any) => setProjects((prev) => [...prev, p]);
   const addEcoTask = (t: any) => setEcoTasks((prev) => [...prev, t]);
   const updateEcoTask = (t: any) =>
     setEcoTasks((prev) => prev.map((x) => (x._id === t._id ? t : x)));
+  const deleteEcoTask = (taskId: string) => {
+    setEcoTasks((prev) => prev.filter((task) => task._id !== taskId));
+  };
 
   // --- render ---
   if (status === "loading" || (status === "authenticated" && loadingProfile)) {
@@ -135,29 +160,11 @@ export default function DashboardPage() {
       {!loadingProfile && clientData && (
         <div className="space-y-10">
           {/* Profile Card */}
-          <motion.div
-            className="bg-white rounded-2xl p-8 shadow-md max-w-4xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
-          >
-            <h2 className="text-2xl font-bold text-emerald-700 mb-4">
-              Welcome back, {clientData.name}! 🌱
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
-              <p>
-                <strong>Email:</strong> {clientData.email}
-              </p>
-            </div>
-            <div className="mt-6 flex justify-start">
-              <button
-                onClick={() => setShowProfileForm(true)}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg transition"
-              >
-                Edit Profile
-              </button>
-            </div>
-          </motion.div>
+          <ProfileDisplay
+            clientData={clientData}
+            session={session}
+            onEdit={() => setShowProfileForm(true)}
+          />
 
           {/* Tabs */}
           <div className="border-b border-gray-200 flex space-x-4">
@@ -208,6 +215,7 @@ export default function DashboardPage() {
                 projects={projects}
                 onAddTask={addEcoTask}
                 onUpdateTask={updateEcoTask}
+                onDeleteTask={deleteEcoTask} 
               />
             )}
           </div>

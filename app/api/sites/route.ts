@@ -1,53 +1,67 @@
-import { NextRequest, NextResponse } from "next/server";
+// app/api/sites/route.ts
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
-import mongoose, { Schema, models, model } from "mongoose";
+import Site from "@/app/models/site";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-// Site Schema
-const siteSchema = new Schema(
-  {
-    name: { type: String, required: true },
-    status: { type: String, default: "active" },
-    sensors: { type: Number, default: 0 },
-    location: { type: String, required: true },
-    alerts: { type: Number, default: 0 },
-  },
-  { timestamps: true }
-);
-
-const Site = models.Site || model("Site", siteSchema);
-
-// GET all sites
-export async function GET(req: NextRequest) {
+export async function GET() {
+  await connectDB();
+  
   try {
-    await connectDB();
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    const sites = await Site.find({}, { __v: 0 }).lean(); // strip __v
+    const sites = await Site.find({ userId: session.user.email })
+      .sort({ createdAt: -1 });
 
     return NextResponse.json(sites);
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error fetching sites:", err);
-    return NextResponse.json(
-      { error: "Failed to fetch sites" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-// Optional: POST route for creating a new site
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
+  await connectDB();
+  
   try {
-    await connectDB();
+    const session = await getServerSession(authOptions);
     const body = await req.json();
 
-    const newSite = new Site(body);
-    const savedSite = await newSite.save();
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    return NextResponse.json(savedSite, { status: 201 });
-  } catch (err) {
-    console.error("Error creating site:", err);
-    return NextResponse.json(
-      { error: "Failed to create site" },
-      { status: 500 }
-    );
+    // Validate required fields
+    if (!body.name || !body.location) {
+      return NextResponse.json(
+        { error: "Site name and location are required" }, 
+        { status: 400 }
+      );
+    }
+
+    const siteData = {
+      userId: session.user.email,
+      profileId: body.profileId || undefined,
+      name: body.name,
+      location: body.location,
+      projectType: body.projectType || 'residential',
+      size: body.size || "",
+      startDate: new Date(body.startDate),
+      endDate: body.endDate ? new Date(body.endDate) : undefined,
+      budget: body.budget || "",
+      status: 'planned'
+    };
+
+    const site = await Site.create(siteData);
+
+    return NextResponse.json(site);
+  } catch (err: any) {
+    console.error("Error saving site:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

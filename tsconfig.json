@@ -36,7 +36,7 @@
     ".next/types/**/*.ts",
     "lib/db.js",
     "app/models/ecotask.ts"
-  ],
+, "app/dashboard/logistics/electricFleet"  ],
   "exclude": [
     "node_modules",
     ".next",

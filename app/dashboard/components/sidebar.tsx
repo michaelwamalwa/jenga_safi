@@ -2,25 +2,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Leaf,
-  Users,
   Gauge,
   Settings,
-  BarChart,
-  Sparkles,
   FileBarChart,
   ClipboardList,
-  HardHat,
-  MapPin,
-  Truck,
   Package,
   Hammer,
   Building,
   Factory,
-  ClipboardCheck,
-  Calendar,
-  AlertCircle,
-  Shield,
+
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -80,11 +70,6 @@ export default function Sidebar({ userRole = "user" }: { userRole?: string }) {
       name: "Materials",
       href: "/dashboard/materials",
       icon: <Package className="h-5 w-5 text-amber-800" />,
-    },
-    {
-      name: "Logistics",
-      href: "/dashboard/logistics",
-      icon: <Truck className="h-5 w-5 text-purple-500" />,
     },
     {
       name: "Project Reports",

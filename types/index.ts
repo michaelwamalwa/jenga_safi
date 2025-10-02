@@ -15,7 +15,7 @@ export interface Supplier {
   export interface SustainableMaterial {
     _id?: string;
     name: string;
-    category: 'concrete' | 'steel' | 'wood' | 'insulation' | 'finishes' | 'other';
+    category: 'brick' | 'concrete' | 'steel' | 'wood' | 'insulation' | 'finishes' | 'other';
     description: string;
     supplierId: string;
     supplier?: Supplier; // Populated from backend
@@ -33,6 +33,7 @@ export interface Supplier {
     certification: string[];
     createdAt?: Date;
     updatedAt?: Date;
+    rating?: number;
   }
   
   export interface MaterialRating {
